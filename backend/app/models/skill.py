@@ -44,4 +44,4 @@ class Skill(Base):
 
     user = relationship("Profile", back_populates="skills")
     exercises = relationship("Exercise", back_populates="skill")
-
+    training_sessions = relationship("TrainingSession", back_populates="skill")

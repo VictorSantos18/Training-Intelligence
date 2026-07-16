@@ -30,4 +30,8 @@ class Profile(Base):
 
     skills = relationship("Skill", back_populates="user", cascade="all, delete-orphan")
     exercises = relationship("Exercise", back_populates="user", cascade="all, delete-orphan")
-
+    training_sessions = relationship(
+        "TrainingSession",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
