@@ -3,9 +3,13 @@ from app.db.base import Base
 
 
 def test_initial_domain_tables_are_registered() -> None:
-    assert {"profiles", "skills", "exercises", "training_sessions"}.issubset(
-        Base.metadata.tables.keys()
-    )
+    assert {
+        "profiles",
+        "skills",
+        "exercises",
+        "training_sessions",
+        "session_exercises",
+    }.issubset(Base.metadata.tables.keys())
 
 
 def test_initial_domain_tables_keep_user_ownership() -> None:

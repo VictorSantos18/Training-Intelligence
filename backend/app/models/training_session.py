@@ -97,3 +97,8 @@ class TrainingSession(Base):
 
     user = relationship("Profile", back_populates="training_sessions")
     skill = relationship("Skill", back_populates="training_sessions")
+    session_exercises = relationship(
+        "SessionExercise",
+        back_populates="training_session",
+        cascade="all, delete-orphan",
+    )
