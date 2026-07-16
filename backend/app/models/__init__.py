@@ -3,5 +3,6 @@ from app.models.profile import Profile
 from app.models.session_exercise import SessionExercise
 from app.models.skill import Skill
 from app.models.training_session import TrainingSession
+from app.models.training_set import TrainingSet
 
-__all__ = ["Exercise", "Profile", "SessionExercise", "Skill", "TrainingSession"]
+__all__ = ["Exercise", "Profile", "SessionExercise", "Skill", "TrainingSession", "TrainingSet"]

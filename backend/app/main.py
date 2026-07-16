@@ -8,6 +8,7 @@ from app.modules.exercises.router import router as exercises_router
 from app.modules.session_exercises.router import router as session_exercises_router
 from app.modules.sessions.router import router as sessions_router
 from app.modules.skills.router import router as skills_router
+from app.modules.training_sets.router import router as training_sets_router
 
 
 def create_app() -> FastAPI:
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
     app.include_router(exercises_router)
     app.include_router(sessions_router)
     app.include_router(session_exercises_router)
+    app.include_router(training_sets_router)
     return app
 
 
