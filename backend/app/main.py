@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.health import router as health_router
 from app.api.me import router as me_router
 from app.core.config import settings
+from app.modules.skills.router import router as skills_router
 
 
 def create_app() -> FastAPI:
@@ -22,6 +23,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health_router)
     app.include_router(me_router)
+    app.include_router(skills_router)
     return app
 
 
