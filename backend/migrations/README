@@ -1,0 +1,6 @@
+Alembic migration environment.
+
+Create the first domain migration after the authentication boundary is in place:
+
+alembic revision --autogenerate -m "create initial domain tables"
+
