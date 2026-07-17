@@ -11,7 +11,7 @@ import styles from "./pain-record-form.module.css";
 const painSchema = z
   .object({
     training_set_id: z.string().optional().default(""),
-    body_region_id: z.string().min(1, "Escolha a regiao."),
+    body_region_id: z.string().min(1, "Escolha a região."),
     side: z.enum(["LEFT", "RIGHT", "BILATERAL", "NOT_APPLICABLE"]),
     moment: z.enum(["PRE_SESSION", "DURING_SET", "POST_SESSION", "CHECKIN_24H", "CHECKIN_48H"]),
     intensity: z.string().min(1, "Informe a intensidade."),
@@ -88,7 +88,7 @@ export function PainRecordForm({ bodyRegions, sets, onSubmit }: PainRecordFormPr
       </label>
 
       <label>
-        <span>Regiao</span>
+        <span>Região</span>
         <select {...register("body_region_id")}>
           <option value="">Selecione</option>
           {bodyRegions.map((region) => (
@@ -103,7 +103,7 @@ export function PainRecordForm({ bodyRegions, sets, onSubmit }: PainRecordFormPr
       <label>
         <span>Lado</span>
         <select {...register("side")}>
-          <option value="NOT_APPLICABLE">Nao aplicavel</option>
+          <option value="NOT_APPLICABLE">Não aplicável</option>
           <option value="LEFT">Esquerdo</option>
           <option value="RIGHT">Direito</option>
           <option value="BILATERAL">Bilateral</option>
@@ -117,8 +117,8 @@ export function PainRecordForm({ bodyRegions, sets, onSubmit }: PainRecordFormPr
       </label>
 
       <label>
-        <span>Descricao</span>
-        <input placeholder="Ex: pontada, tensao, desconforto..." type="text" {...register("description")} />
+        <span>Descrição</span>
+        <input placeholder="Ex: pontada, tensão, desconforto..." type="text" {...register("description")} />
       </label>
 
       <label>

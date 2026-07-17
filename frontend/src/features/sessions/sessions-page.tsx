@@ -65,7 +65,7 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
         );
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar sessoes.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar sessões.");
     } finally {
       setIsLoading(false);
     }
@@ -103,9 +103,9 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
       );
       setSessions((currentSessions) => [createdSession, ...currentSessions]);
       setSelectedSession(createdSession);
-      setFeedback("Sessao criada.");
+      setFeedback("Sessão criada.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel criar a sessao.");
+      setError(err instanceof Error ? err.message : "Não foi possível criar a sessão.");
     }
   }
 
@@ -113,10 +113,10 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
     <section className={styles.page}>
       <header className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>Sessoes</p>
+          <p className={styles.eyebrow}>Sessões</p>
           <h2>Registro base dos seus treinos.</h2>
           <p>
-            Crie sessoes, acompanhe energia e sono, e feche o ciclo do treino com suas
+            Crie sessões, acompanhe energia e sono, e feche o ciclo do treino com suas
             notas finais.
           </p>
         </div>
@@ -125,7 +125,7 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
         </button>
       </header>
 
-      <section className={styles.summary} aria-label="Resumo de sessoes">
+      <section className={styles.summary} aria-label="Resumo de sessões">
         {(Object.keys(sessionStatusLabels) as TrainingSessionStatus[]).map((status) => (
           <article className={styles.summaryItem} key={status}>
             <span>{sessionStatusLabels[status]}</span>
@@ -137,7 +137,7 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
       <div className={styles.content}>
         <aside className={styles.formPanel}>
           <div className={styles.panelHeader}>
-            <h3>Nova sessao</h3>
+            <h3>Nova sessão</h3>
             <p>Registre apenas o contexto essencial antes do treino.</p>
           </div>
           <SessionForm skills={skills} onSubmit={handleCreateSession} />
@@ -145,7 +145,7 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
 
         <section className={styles.listPanel}>
           <div className={styles.panelHeader}>
-            <h3>Sessoes registradas</h3>
+            <h3>Sessões registradas</h3>
             <p>{isLoading ? "Carregando..." : `${sessions.length} registro(s)`}</p>
           </div>
 
@@ -197,7 +197,7 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
 
 export function SessionsPage() {
   return (
-    <ProtectedView errorTitle="Nao foi possivel abrir suas sessoes">
+    <ProtectedView errorTitle="Não foi possível abrir suas sessões">
       {(session) => <SessionsContent accessToken={session.accessToken} />}
     </ProtectedView>
   );

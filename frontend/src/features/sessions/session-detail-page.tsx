@@ -49,7 +49,7 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
       setSkills(skillsData);
       setSession(sessionData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar a sessao.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar a sessão.");
     } finally {
       setIsLoading(false);
     }
@@ -82,9 +82,9 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
       );
       setSession(finishedSession);
       setSessionToFinish(null);
-      setFeedback("Sessao finalizada.");
+      setFeedback("Sessão finalizada.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel finalizar a sessao.");
+      setError(err instanceof Error ? err.message : "Não foi possível finalizar a sessão.");
     }
   }
 
@@ -101,31 +101,31 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
       const cancelledSession = await cancelTrainingSession(accessToken, sessionToCancel.id);
       setSession(cancelledSession);
       setSessionToCancel(null);
-      setFeedback("Sessao cancelada.");
+      setFeedback("Sessão cancelada.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel cancelar a sessao.");
+      setError(err instanceof Error ? err.message : "Não foi possível cancelar a sessão.");
     } finally {
       setIsCancelling(false);
     }
   }
 
   if (isLoading) {
-    return <p className={styles.loading}>Carregando sessao...</p>;
+    return <p className={styles.loading}>Carregando sessão...</p>;
   }
 
   if (!session) {
     return (
       <section className={styles.empty}>
-        <h2>Sessao nao encontrada</h2>
-        <p>{error ?? "Volte para a lista e escolha outra sessao."}</p>
-        <Link href="/sessions">Voltar para sessoes</Link>
+        <h2>Sessão não encontrada</h2>
+        <p>{error ?? "Volte para a lista e escolha outra sessão."}</p>
+        <Link href="/sessions">Voltar para sessões</Link>
       </section>
     );
   }
 
   const skillLabel = session.skill_id
-    ? skillNameById[session.skill_id] ?? "Skill nao encontrada"
-    : "Sessao geral";
+    ? skillNameById[session.skill_id] ?? "Skill não encontrada"
+    : "Sessão geral";
   const isSessionOpen = session.status === "IN_PROGRESS";
 
   return (
@@ -133,10 +133,10 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
       <header className={styles.header}>
         <div>
           <Link className={styles.backLink} href="/sessions">
-            Voltar para sessoes
+            Voltar para sessões
           </Link>
           <p className={styles.eyebrow}>
-            {isSessionOpen ? "Treino em execucao" : "Historico do treino"}
+            {isSessionOpen ? "Treino em execução" : "Histórico do treino"}
           </p>
           <h2>{skillLabel}</h2>
           <p>{new Date(session.started_at).toLocaleString("pt-BR")}</p>
@@ -171,7 +171,7 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
           <strong>{session.sleep_hours ?? "-"}</strong>
         </article>
         <article>
-          <span>Termino</span>
+          <span>Término</span>
           <strong>
             {session.finished_at ? new Date(session.finished_at).toLocaleString("pt-BR") : "-"}
           </strong>
@@ -196,8 +196,8 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
       ) : null}
 
       <ConfirmDialog
-        confirmLabel="Cancelar sessao"
-        description="A sessao sera marcada como cancelada. O registro permanece no historico."
+        confirmLabel="Cancelar sessão"
+        description="A sessão será marcada como cancelada. O registro permanece no histórico."
         isOpen={sessionToCancel !== null}
         isProcessing={isCancelling}
         title="Confirmar cancelamento"
@@ -211,7 +211,7 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
 
 export function SessionDetailPage({ sessionId }: SessionDetailPageProps) {
   return (
-    <ProtectedView errorTitle="Nao foi possivel abrir esta sessao">
+    <ProtectedView errorTitle="Não foi possível abrir esta sessão">
       {(session) => <SessionDetailContent accessToken={session.accessToken} sessionId={sessionId} />}
     </ProtectedView>
   );

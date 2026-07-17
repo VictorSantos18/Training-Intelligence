@@ -26,7 +26,7 @@ export function AuthRedirect() {
   return (
     <LoadingState
       title="Carregando sua area de treino"
-      message="Estamos direcionando voce para o melhor ponto de partida."
+      message="Estamos direcionando você para o melhor ponto de partida."
     />
   );
 }

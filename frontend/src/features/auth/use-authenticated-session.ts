@@ -24,7 +24,7 @@ export function useAuthenticatedSession(): AuthenticatedSessionResult {
 
     async function loadSession() {
       if (!isSupabaseConfigured()) {
-        setError("Supabase nao esta configurado no frontend.");
+        setError("Supabase não está configurado no frontend.");
         setSessionState("unauthenticated");
         return;
       }
@@ -51,7 +51,7 @@ export function useAuthenticatedSession(): AuthenticatedSessionResult {
         if (!isMounted) {
           return;
         }
-        setError(err instanceof Error ? err.message : "Falha ao validar usuario.");
+        setError(err instanceof Error ? err.message : "Falha ao validar usuário.");
         setSessionState("unauthenticated");
       }
     }

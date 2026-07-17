@@ -1,4 +1,5 @@
 import type {
+  AnalyticsOverview,
   ApiErrorPayload,
   BodyRegion,
   CurrentUser,
@@ -50,7 +51,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   });
 
   if (!response.ok) {
-    let message = "Nao foi possivel concluir a requisicao.";
+    let message = "Não foi possível concluir a requisição.";
     try {
       const payload = (await response.json()) as ApiErrorPayload;
       if (payload.detail) {
@@ -71,6 +72,10 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
 export function getCurrentUser(accessToken: string) {
   return apiFetch<CurrentUser>("/me", { accessToken });
+}
+
+export function getAnalyticsOverview(accessToken: string) {
+  return apiFetch<AnalyticsOverview>("/analytics/overview", { accessToken });
 }
 
 export function listSkills(accessToken: string) {

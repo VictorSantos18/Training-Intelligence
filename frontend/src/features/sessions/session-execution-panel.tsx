@@ -78,9 +78,9 @@ function buildPainRecordPayload(sessionId: string, values: PainRecordFormValues)
 }
 
 const painMomentLabels = {
-  PRE_SESSION: "Pre-sessao",
+  PRE_SESSION: "Pré-sessão",
   DURING_SET: "Durante o set",
-  POST_SESSION: "Pos-sessao",
+  POST_SESSION: "Pós-sessão",
   CHECKIN_24H: "Check-in 24h",
   CHECKIN_48H: "Check-in 48h",
 };
@@ -89,7 +89,7 @@ const painSideLabels = {
   LEFT: "Esquerdo",
   RIGHT: "Direito",
   BILATERAL: "Bilateral",
-  NOT_APPLICABLE: "Nao aplicavel",
+  NOT_APPLICABLE: "Não aplicável",
 };
 
 export function SessionExecutionPanel({ accessToken, session }: SessionExecutionPanelProps) {
@@ -135,7 +135,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
       setPainRecords(painRecordsData);
       setSetsBySessionExercise(Object.fromEntries(setPairs));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar o treino.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar o treino.");
     } finally {
       setIsLoading(false);
     }
@@ -186,9 +186,9 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
         ...current,
         [createdSessionExercise.id]: [],
       }));
-      setFeedback("Exercicio adicionado ao treino.");
+      setFeedback("Exercício adicionado ao treino.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel adicionar exercicio.");
+      setError(err instanceof Error ? err.message : "Não foi possível adicionar exercício.");
     }
   }
 
@@ -211,7 +211,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
       }));
       setFeedback("Set registrado.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel registrar o set.");
+      setError(err instanceof Error ? err.message : "Não foi possível registrar o set.");
     }
   }
 
@@ -227,7 +227,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
       setPainRecords((current) => [createdPainRecord, ...current]);
       setFeedback("Dor registrada.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel registrar dor.");
+      setError(err instanceof Error ? err.message : "Não foi possível registrar dor.");
     }
   }
 
@@ -235,11 +235,11 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
     <section className={styles.panel}>
       <header className={styles.header}>
         <div>
-          <h3>{isSessionOpen ? "Treino em execucao" : "Resumo do treino"}</h3>
+          <h3>{isSessionOpen ? "Treino em execução" : "Resumo do treino"}</h3>
           <p>
             {isSessionOpen
-              ? "Monte a sessao, registre sets e acompanhe desconfortos."
-              : "Revise exercicios, sets registrados e sinais de dor desta sessao."}
+              ? "Monte a sessão, registre sets e acompanhe desconfortos."
+              : "Revise exercícios, sets registrados e sinais de dor desta sessão."}
           </p>
         </div>
         <button type="button" onClick={loadExecution}>
@@ -258,7 +258,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
             {!isSessionOpen ? (
               <section className={styles.historyStats} aria-label="Resumo do treino finalizado">
                 <article>
-                  <span>Exercicios</span>
+                  <span>Exercícios</span>
                   <strong>{sessionExercises.length}</strong>
                 </article>
                 <article>
@@ -277,7 +277,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
             ) : null}
 
             <div className={styles.sectionHeader}>
-              <h4>Exercicios da sessao</h4>
+              <h4>Exercícios da sessão</h4>
               {!isSessionOpen ? <span>Somente leitura</span> : null}
             </div>
 
@@ -301,7 +301,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
           <div className={styles.column}>
             <div className={styles.sectionHeader}>
               <h4>Dor e desconforto</h4>
-              {!isSessionOpen ? <span>Historico</span> : null}
+              {!isSessionOpen ? <span>Histórico</span> : null}
             </div>
             {isSessionOpen ? (
               <PainRecordForm
@@ -313,11 +313,11 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
 
             <div className={styles.painList}>
               {painRecords.length === 0 ? (
-                <p className={styles.empty}>Nenhum registro de dor nesta sessao.</p>
+                <p className={styles.empty}>Nenhum registro de dor nesta sessão.</p>
               ) : (
                 painRecords.map((record) => (
                   <article className={styles.painCard} key={record.id}>
-                    <strong>{bodyRegionNameById[record.body_region_id] ?? "Regiao"}</strong>
+                    <strong>{bodyRegionNameById[record.body_region_id] ?? "Região"}</strong>
                     <span>
                       {painMomentLabels[record.moment]} - {painSideLabels[record.side]} -
                       intensidade {record.intensity}/10

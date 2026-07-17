@@ -18,11 +18,11 @@ type SessionFinishFormProps = {
 export function SessionFinishForm({ session, onCancel, onSubmit }: SessionFinishFormProps) {
   const finishFormSchema = z
     .object({
-      finished_at: z.string().min(1, "Informe o horario de termino."),
+      finished_at: z.string().min(1, "Informe o horário de término."),
       notes_after: z.string().optional().default(""),
     })
     .refine((values) => new Date(values.finished_at) > new Date(session.started_at), {
-      message: "O termino precisa ser posterior ao inicio da sessao.",
+      message: "O término precisa ser posterior ao início da sessão.",
       path: ["finished_at"],
     });
 
@@ -48,7 +48,7 @@ export function SessionFinishForm({ session, onCancel, onSubmit }: SessionFinish
         onMouseDown={(event) => event.stopPropagation()}
       >
         <header className={styles.header}>
-          <p>Finalizar sessao</p>
+          <p>Finalizar sessão</p>
           <h2 id="finish-session-title">
             {new Date(session.started_at).toLocaleString("pt-BR")}
           </h2>
@@ -56,7 +56,7 @@ export function SessionFinishForm({ session, onCancel, onSubmit }: SessionFinish
 
         <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
           <label className={styles.field}>
-            <span>Termino</span>
+            <span>Término</span>
             <input type="datetime-local" {...register("finished_at")} />
             {errors.finished_at ? <small>{errors.finished_at.message}</small> : null}
           </label>

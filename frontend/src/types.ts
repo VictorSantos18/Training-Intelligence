@@ -240,3 +240,54 @@ export type PainRecordCreatePayload = {
   description?: string | null;
   notes?: string | null;
 };
+
+export type AnalyticsStats = {
+  total_sessions: number;
+  completed_sessions: number;
+  in_progress_sessions: number;
+  cancelled_sessions: number;
+  total_sets: number;
+  pain_records: number;
+  average_energy_before: number | null;
+  average_sleep_hours: number | null;
+};
+
+export type SessionsBySkillItem = {
+  skill_id: string | null;
+  skill_name: string;
+  session_count: number;
+  completed_count: number;
+};
+
+export type RecentSessionItem = {
+  id: string;
+  skill_name: string;
+  status: TrainingSessionStatus;
+  started_at: string;
+  finished_at: string | null;
+};
+
+export type TopExerciseItem = {
+  exercise_id: string;
+  exercise_name: string;
+  set_count: number;
+  success_count: number;
+  total_repetitions: number;
+  total_duration_seconds: number;
+};
+
+export type PainByRegionItem = {
+  body_region_id: string;
+  body_region_name: string;
+  record_count: number;
+  average_intensity: number;
+  max_intensity: number;
+};
+
+export type AnalyticsOverview = {
+  stats: AnalyticsStats;
+  sessions_by_skill: SessionsBySkillItem[];
+  recent_sessions: RecentSessionItem[];
+  top_exercises: TopExerciseItem[];
+  pain_by_region: PainByRegionItem[];
+};

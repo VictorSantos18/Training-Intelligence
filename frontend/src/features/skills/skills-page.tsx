@@ -44,7 +44,7 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
       const data = await listSkills(accessToken);
       setSkills(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar skills.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar skills.");
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +72,7 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
       setSkills((currentSkills) => [createdSkill, ...currentSkills]);
       setFeedback("Skill criada com sucesso.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel criar a skill.");
+      setError(err instanceof Error ? err.message : "Não foi possível criar a skill.");
     }
   }
 
@@ -86,7 +86,7 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
       );
       setFeedback("Skill atualizada.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel atualizar a skill.");
+      setError(err instanceof Error ? err.message : "Não foi possível atualizar a skill.");
     }
   }
 
@@ -102,7 +102,7 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
       );
       setFeedback("Status atualizado.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel alterar o status.");
+      setError(err instanceof Error ? err.message : "Não foi possível alterar o status.");
     }
   }
 
@@ -122,7 +122,7 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
       setSkillToDelete(null);
       setFeedback("Skill excluida.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel excluir a skill.");
+      setError(err instanceof Error ? err.message : "Não foi possível excluir a skill.");
     } finally {
       setIsDeleting(false);
     }
@@ -136,7 +136,7 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
           <h2>Habilidades que guiam seu treino.</h2>
           <p>
             Cadastre objetivos como Front Lever e Iron Cross, acompanhe status e mantenha
-            uma base limpa para associar exercicios e sessoes.
+            uma base limpa para associar exercícios e sessões.
           </p>
         </div>
         <button className={styles.refresh} type="button" onClick={loadSkills}>
@@ -157,7 +157,7 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
         <aside className={styles.formPanel}>
           <div className={styles.panelHeader}>
             <h3>Nova skill</h3>
-            <p>Use nomes claros. Eles serao usados nos filtros e nos exercicios.</p>
+            <p>Use nomes claros. Eles serão usados nos filtros e nos exercícios.</p>
           </div>
           <SkillForm submitLabel="Criar skill" onSubmit={handleCreateSkill} />
         </aside>
@@ -185,12 +185,12 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
         confirmLabel="Excluir skill"
         description={
           skillToDelete
-            ? `A skill "${skillToDelete.name}" sera removida. Essa acao deve ser usada apenas para registros de teste ou criados por engano.`
+            ? `A skill "${skillToDelete.name}" será removida. Essa ação deve ser usada apenas para registros de teste ou criados por engano.`
             : ""
         }
         isOpen={skillToDelete !== null}
         isProcessing={isDeleting}
-        title="Confirmar exclusao"
+        title="Confirmar exclusão"
         tone="danger"
         onCancel={() => setSkillToDelete(null)}
         onConfirm={() => void confirmDeleteSkill()}
@@ -201,7 +201,7 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
 
 export function SkillsPage() {
   return (
-    <ProtectedView errorTitle="Nao foi possivel abrir suas skills">
+    <ProtectedView errorTitle="Não foi possível abrir suas skills">
       {(session) => <SkillsContent accessToken={session.accessToken} />}
     </ProtectedView>
   );

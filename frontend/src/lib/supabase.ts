@@ -12,7 +12,7 @@ export function isSupabaseConfigured() {
 
 export function getSupabaseClient() {
   if (!isSupabaseConfigured()) {
-    throw new Error("Supabase nao esta configurado no frontend.");
+    throw new Error("Supabase não está configurado no frontend.");
   }
 
   if (!browserClient) {

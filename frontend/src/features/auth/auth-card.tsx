@@ -75,8 +75,8 @@ export function AuthCard({ mode }: AuthCardProps) {
         </h1>
         <p className={styles.description}>
           {isSignup
-            ? "Comece seu historico de treinos com uma base organizada desde o primeiro registro."
-            : "Acesse seu historico, registre sessoes e acompanhe sinais de evolucao com mais clareza."}
+            ? "Comece seu histórico de treinos com uma base organizada desde o primeiro registro."
+            : "Acesse seu histórico, registre sessões e acompanhe sinais de evolução com mais clareza."}
         </p>
       </div>
 
@@ -87,7 +87,7 @@ export function AuthCard({ mode }: AuthCardProps) {
             className={styles.input}
             type="email"
             autoComplete="email"
-            placeholder="voce@email.com"
+            placeholder="seu@email.com"
             {...register("email")}
           />
           {errors.email ? <small className={styles.error}>{errors.email.message}</small> : null}
@@ -116,7 +116,7 @@ export function AuthCard({ mode }: AuthCardProps) {
       </form>
 
       <p className={styles.switch}>
-        {isSignup ? "Ja tem uma conta?" : "Ainda nao tem uma conta?"}{" "}
+        {isSignup ? "Já tem uma conta?" : "Ainda não tem uma conta?"}{" "}
         <Link href={isSignup ? "/login" : "/signup"}>
           {isSignup ? "Entrar" : "Criar conta"}
         </Link>

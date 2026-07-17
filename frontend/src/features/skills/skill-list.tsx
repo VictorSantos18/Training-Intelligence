@@ -38,7 +38,7 @@ export function SkillList({
     return (
       <div className={styles.emptyState}>
         <h4>Nenhuma skill cadastrada ainda.</h4>
-        <p>Crie sua primeira habilidade para organizar exercicios e sessoes.</p>
+        <p>Crie sua primeira habilidade para organizar exercícios e sessões.</p>
       </div>
     );
   }
@@ -53,7 +53,7 @@ export function SkillList({
             {isEditing ? (
               <SkillForm
                 initialSkill={skill}
-                submitLabel="Salvar alteracoes"
+                submitLabel="Salvar alterações"
                 onCancel={() => setEditingSkillId(null)}
                 onSubmit={async (values) => {
                   await onUpdate(skill.id, values);
@@ -82,7 +82,7 @@ export function SkillList({
                 </div>
 
                 <p className={styles.description}>
-                  {skill.description || "Sem descricao cadastrada."}
+                  {skill.description || "Sem descrição cadastrada."}
                 </p>
 
                 <div className={styles.meta}>

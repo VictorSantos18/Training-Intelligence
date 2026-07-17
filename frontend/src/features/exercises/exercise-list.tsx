@@ -39,14 +39,14 @@ export function ExerciseList({
   const [editingExerciseId, setEditingExerciseId] = useState<string | null>(null);
 
   if (isLoading) {
-    return <p className={styles.empty}>Carregando exercicios...</p>;
+    return <p className={styles.empty}>Carregando exercícios...</p>;
   }
 
   if (exercises.length === 0) {
     return (
       <div className={styles.emptyState}>
-        <h4>Nenhum exercicio encontrado.</h4>
-        <p>Crie um exercicio ou ajuste os filtros para consultar registros inativos.</p>
+        <h4>Nenhum exercício encontrado.</h4>
+        <p>Crie um exercício ou ajuste os filtros para consultar registros inativos.</p>
       </div>
     );
   }
@@ -56,7 +56,7 @@ export function ExerciseList({
       {exercises.map((exercise) => {
         const isEditing = editingExerciseId === exercise.id;
         const skillLabel = exercise.skill_id
-          ? skillNameById[exercise.skill_id] ?? "Skill nao encontrada"
+          ? skillNameById[exercise.skill_id] ?? "Skill não encontrada"
           : "Acessorio geral";
 
         return (
@@ -67,7 +67,7 @@ export function ExerciseList({
                 initialExercise={exercise}
                 measurementLabels={measurementLabels}
                 skills={skills}
-                submitLabel="Salvar alteracoes"
+                submitLabel="Salvar alterações"
                 onCancel={() => setEditingExerciseId(null)}
                 onSubmit={async (values) => {
                   await onUpdate(exercise.id, values);

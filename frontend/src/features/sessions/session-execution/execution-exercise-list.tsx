@@ -28,7 +28,7 @@ export function ExecutionExerciseList({
   onCreateSet,
 }: ExecutionExerciseListProps) {
   if (sessionExercises.length === 0) {
-    return <p className={styles.empty}>Nenhum exercicio adicionado nesta sessao.</p>;
+    return <p className={styles.empty}>Nenhum exercício adicionado nesta sessão.</p>;
   }
 
   return (
@@ -41,7 +41,7 @@ export function ExecutionExerciseList({
             <header className={styles.header}>
               <span>#{sessionExercise.execution_order}</span>
               <div>
-                <h5>{exerciseNameById[sessionExercise.exercise_id] ?? "Exercicio"}</h5>
+                <h5>{exerciseNameById[sessionExercise.exercise_id] ?? "Exercício"}</h5>
                 {sessionExercise.notes ? <p>{sessionExercise.notes}</p> : null}
               </div>
             </header>

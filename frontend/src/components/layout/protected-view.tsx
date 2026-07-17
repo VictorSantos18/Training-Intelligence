@@ -17,7 +17,7 @@ type ProtectedViewProps = {
 
 export function ProtectedView({
   children,
-  errorTitle = "Nao foi possivel abrir esta area",
+  errorTitle = "Não foi possível abrir esta área",
 }: ProtectedViewProps) {
   const router = useRouter();
   const { sessionState, session, error } = useAuthenticatedSession();
@@ -25,7 +25,7 @@ export function ProtectedView({
   if (sessionState === "checking") {
     return (
       <LoadingState
-        title="Validando sessao"
+        title="Validando sessão"
         message="Estamos conferindo seu acesso e preparando seu painel."
       />
     );

@@ -31,7 +31,7 @@ export function AppShell({ user, children }: AppShellProps) {
           <h1 className={styles.brand}>Intelligence</h1>
         </div>
 
-        <nav className={styles.nav} aria-label="Navegacao principal">
+        <nav className={styles.nav} aria-label="Navegação principal">
           <Link
             className={pathname === "/dashboard" ? styles.navItemActive : styles.navItem}
             href="/dashboard"
@@ -48,19 +48,19 @@ export function AppShell({ user, children }: AppShellProps) {
             className={pathname === "/exercises" ? styles.navItemActive : styles.navItem}
             href="/exercises"
           >
-            Exercicios
+            Exercícios
           </Link>
           <Link
             className={pathname === "/sessions" ? styles.navItemActive : styles.navItem}
             href="/sessions"
           >
-            Sessoes
+            Sessões
           </Link>
         </nav>
 
         <div className={styles.account}>
           <span className={styles.accountLabel}>Conta</span>
-          <strong className={styles.email}>{user.email ?? "Usuario autenticado"}</strong>
+          <strong className={styles.email}>{user.email ?? "Usuário autenticado"}</strong>
           <button className={styles.logout} type="button" onClick={handleLogout}>
             Sair
           </button>

@@ -28,7 +28,7 @@ const measurementTypes: ExerciseMeasurementType[] = ["REPS", "SECONDS", "DISTANC
 
 const exerciseFormSchema = z.object({
   skill_id: z.string().optional().default(""),
-  name: z.string().trim().min(1, "Informe o nome do exercicio.").max(150),
+  name: z.string().trim().min(1, "Informe o nome do exercício.").max(150),
   category: z.enum(["HOLD", "PRESS", "PULL", "RAISE", "NEGATIVE", "ACCESSORY"]),
   measurement_type: z.enum(["REPS", "SECONDS", "DISTANCE", "CUSTOM"]),
 });
@@ -119,7 +119,7 @@ export function ExerciseForm({
       </label>
 
       <label className={styles.field}>
-        <span>Medicao principal</span>
+        <span>Medição principal</span>
         <select className={styles.select} {...register("measurement_type")}>
           {measurementTypes.map((measurementType) => (
             <option key={measurementType} value={measurementType}>

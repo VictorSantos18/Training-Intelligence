@@ -17,7 +17,7 @@ const zeroToTenString = z
 
 const sessionFormSchema = z.object({
   skill_id: z.string().optional().default(""),
-  started_at: z.string().min(1, "Informe o inicio da sessao."),
+  started_at: z.string().min(1, "Informe o início da sessão."),
   sleep_hours: z
     .string()
     .refine((value) => value === "" || (Number(value) >= 0 && Number(value) <= 24), {
@@ -62,7 +62,7 @@ export function SessionForm({ skills, onSubmit }: SessionFormProps) {
       <label className={styles.field}>
         <span>Skill</span>
         <select className={styles.input} {...register("skill_id")}>
-          <option value="">Sessao geral</option>
+          <option value="">Sessão geral</option>
           {skills.map((skill) => (
             <option key={skill.id} value={skill.id}>
               {skill.name}
@@ -72,7 +72,7 @@ export function SessionForm({ skills, onSubmit }: SessionFormProps) {
       </label>
 
       <label className={styles.field}>
-        <span>Inicio</span>
+        <span>Início</span>
         <input className={styles.input} type="datetime-local" {...register("started_at")} />
         {errors.started_at ? (
           <small className={styles.error}>{errors.started_at.message}</small>
@@ -111,7 +111,7 @@ export function SessionForm({ skills, onSubmit }: SessionFormProps) {
       </div>
 
       <button className={styles.submit} type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Criando..." : "Criar sessao"}
+        {isSubmitting ? "Criando..." : "Criar sessão"}
       </button>
     </form>
   );

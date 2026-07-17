@@ -26,7 +26,7 @@ const setSchema = z
     (values) =>
       values.result === "SKIPPED" || values.repetitions !== "" || values.duration_seconds !== "",
     {
-      message: "Informe repeticoes ou duracao, salvo se o set foi pulado.",
+      message: "Informe repetições ou duração, salvo se o set foi pulado.",
       path: ["duration_seconds"],
     },
   );
@@ -81,9 +81,9 @@ export function TrainingSetForm({ nextSetNumber, onSubmit }: TrainingSetFormProp
   return (
     <form className={styles.form} onSubmit={handleSubmit(submit)}>
       <input aria-label="Numero do set" min="1" type="number" {...register("set_number")} />
-      <input aria-label="Repeticoes" min="0" placeholder="Reps" type="number" {...register("repetitions")} />
+      <input aria-label="Repetições" min="0" placeholder="Reps" type="number" {...register("repetitions")} />
       <input
-        aria-label="Duracao em segundos"
+        aria-label="Duração em segundos"
         min="0"
         placeholder="Segundos"
         step="0.01"

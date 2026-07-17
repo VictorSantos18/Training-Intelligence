@@ -72,7 +72,7 @@ export function SkillForm({ initialSkill, submitLabel, onCancel, onSubmit }: Ski
       </label>
 
       <label className={styles.field}>
-        <span>Descricao</span>
+        <span>Descrição</span>
         <textarea
           className={styles.textarea}
           placeholder="Objetivo tecnico, foco atual ou contexto."

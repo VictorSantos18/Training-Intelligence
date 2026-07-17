@@ -39,7 +39,7 @@ const categoryLabels: Record<ExerciseCategory, string> = {
 };
 
 const measurementLabels: Record<ExerciseMeasurementType, string> = {
-  REPS: "Repeticoes",
+  REPS: "Repetições",
   SECONDS: "Segundos",
   DISTANCE: "Distancia",
   CUSTOM: "Custom",
@@ -90,7 +90,7 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
       setSkills(skillsData);
       setExercises(exercisesData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel carregar exercicios.");
+      setError(err instanceof Error ? err.message : "Não foi possível carregar exercícios.");
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +117,9 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
     try {
       const createdExercise = await createExercise(accessToken, buildExercisePayload(values));
       setExercises((currentExercises) => [createdExercise, ...currentExercises]);
-      setFeedback("Exercicio criado com sucesso.");
+      setFeedback("Exercício criado com sucesso.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel criar o exercicio.");
+      setError(err instanceof Error ? err.message : "Não foi possível criar o exercício.");
     }
   }
 
@@ -138,9 +138,9 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
           exercise.id === exerciseId ? updatedExercise : exercise,
         ),
       );
-      setFeedback("Exercicio atualizado.");
+      setFeedback("Exercício atualizado.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel atualizar o exercicio.");
+      setError(err instanceof Error ? err.message : "Não foi possível atualizar o exercício.");
     }
   }
 
@@ -161,9 +161,9 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
         ),
       );
       setExerciseToDeactivate(null);
-      setFeedback("Exercicio desativado.");
+      setFeedback("Exercício desativado.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel desativar o exercicio.");
+      setError(err instanceof Error ? err.message : "Não foi possível desativar o exercício.");
     } finally {
       setIsDeactivating(false);
     }
@@ -182,9 +182,9 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
           currentExercise.id === exercise.id ? reactivatedExercise : currentExercise,
         ),
       );
-      setFeedback("Exercicio reativado.");
+      setFeedback("Exercício reativado.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel reativar o exercicio.");
+      setError(err instanceof Error ? err.message : "Não foi possível reativar o exercício.");
     }
   }
 
@@ -192,10 +192,10 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
     <section className={styles.page}>
       <header className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>Exercicios</p>
-          <h2>Movimentos que alimentam suas sessoes.</h2>
+          <p className={styles.eyebrow}>Exercícios</p>
+          <h2>Movimentos que alimentam suas sessões.</h2>
           <p>
-            Cadastre holds, presses, pulls, raises, negativas e acessorios. Cada exercicio
+            Cadastre holds, presses, pulls, raises, negativas e acessórios. Cada exercício
             pode ficar ligado a uma skill ou funcionar como apoio geral.
           </p>
         </div>
@@ -204,7 +204,7 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
         </button>
       </header>
 
-      <section className={styles.summary} aria-label="Resumo de exercicios">
+      <section className={styles.summary} aria-label="Resumo de exercícios">
         <article className={styles.summaryItem}>
           <span>Visiveis no filtro</span>
           <strong>{exercises.length}</strong>
@@ -222,21 +222,21 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
       <div className={styles.content}>
         <aside className={styles.formPanel}>
           <div className={styles.panelHeader}>
-            <h3>Novo exercicio</h3>
-            <p>Escolha a metrica principal com cuidado; ela define como a execucao sera registrada.</p>
+            <h3>Novo exercício</h3>
+            <p>Escolha a métrica principal com cuidado; ela define como a execução será registrada.</p>
           </div>
           <ExerciseForm
             categoryLabels={categoryLabels}
             measurementLabels={measurementLabels}
             skills={skills}
-            submitLabel="Criar exercicio"
+            submitLabel="Criar exercício"
             onSubmit={handleCreateExercise}
           />
         </aside>
 
         <section className={styles.listPanel}>
           <div className={styles.panelHeader}>
-            <h3>Exercicios cadastrados</h3>
+            <h3>Exercícios cadastrados</h3>
             <p>{isLoading ? "Carregando..." : `${exercises.length} registro(s)`}</p>
           </div>
 
@@ -287,15 +287,15 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
       </div>
 
       <ConfirmDialog
-        confirmLabel="Desativar exercicio"
+        confirmLabel="Desativar exercício"
         description={
           exerciseToDeactivate
-            ? `O exercicio "${exerciseToDeactivate.name}" deixara de aparecer nos fluxos ativos, mas o historico existente sera preservado.`
+            ? `O exercício "${exerciseToDeactivate.name}" deixará de aparecer nos fluxos ativos, mas o histórico existente será preservado.`
             : ""
         }
         isOpen={exerciseToDeactivate !== null}
         isProcessing={isDeactivating}
-        title="Confirmar desativacao"
+        title="Confirmar desativação"
         tone="danger"
         onCancel={() => setExerciseToDeactivate(null)}
         onConfirm={() => void confirmDeactivateExercise()}
@@ -306,7 +306,7 @@ function ExercisesContent({ accessToken }: ExercisesContentProps) {
 
 export function ExercisesPage() {
   return (
-    <ProtectedView errorTitle="Nao foi possivel abrir seus exercicios">
+    <ProtectedView errorTitle="Não foi possível abrir seus exercícios">
       {(session) => <ExercisesContent accessToken={session.accessToken} />}
     </ProtectedView>
   );

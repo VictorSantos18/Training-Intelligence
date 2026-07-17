@@ -10,7 +10,7 @@ import type { Exercise, SessionExerciseFormValues } from "@/types";
 import styles from "./execution-exercise-form.module.css";
 
 const sessionExerciseSchema = z.object({
-  exercise_id: z.string().min(1, "Escolha um exercicio."),
+  exercise_id: z.string().min(1, "Escolha um exercício."),
   execution_order: z.string().min(1, "Informe a ordem."),
   notes: z.string().optional().default(""),
 });
@@ -57,10 +57,10 @@ export function ExecutionExerciseForm({
   return (
     <form className={styles.form} onSubmit={handleSubmit(submit)}>
       <label className={styles.field}>
-        <span>Exercicio</span>
+        <span>Exercício</span>
         <select disabled={!hasExercises} {...register("exercise_id")}>
           <option value="">
-            {hasExercises ? "Selecione" : "Nenhum exercicio para esta skill"}
+            {hasExercises ? "Selecione" : "Nenhum exercício para esta skill"}
           </option>
           {exercises.map((exercise) => (
             <option key={exercise.id} value={exercise.id}>
@@ -79,7 +79,7 @@ export function ExecutionExerciseForm({
 
       <label className={styles.field}>
         <span>Notas</span>
-        <input placeholder="Objetivo, variacao, ajuste..." type="text" {...register("notes")} />
+        <input placeholder="Objetivo, variação, ajuste..." type="text" {...register("notes")} />
       </label>
 
       <button type="submit" disabled={isSubmitting || !hasExercises}>
