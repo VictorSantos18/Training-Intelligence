@@ -23,15 +23,8 @@ def make_training_session(**overrides: object) -> SimpleNamespace:
         "skill_id": SKILL_ID,
         "started_at": now,
         "finished_at": None,
-        "body_weight_kg": Decimal("72.40"),
         "sleep_hours": Decimal("7.50"),
-        "sleep_quality": 8,
         "energy_before": 7,
-        "motivation_before": 8,
-        "fatigue_before": 3,
-        "fatigue_after": None,
-        "performance_rating": None,
-        "notes_before": "Light biceps sensitivity.",
         "notes_after": None,
         "status": "IN_PROGRESS",
         "created_at": now,
@@ -86,9 +79,8 @@ def test_create_session_uses_current_user_id() -> None:
         json={
             "skill_id": SKILL_ID,
             "started_at": "2026-07-16T18:00:00-03:00",
-            "body_weight_kg": 72.4,
             "sleep_hours": 7.5,
-            "sleep_quality": 8,
+            "energy_before": 8,
         },
     )
 
@@ -152,11 +144,14 @@ def test_finish_session_uses_current_user_id() -> None:
         return_value=make_training_session(
             status="COMPLETED",
             finished_at=datetime.now(UTC),
-            fatigue_after=6,
+            notes_after="Treino forte e consistente.",
         )
     )
 
-    response = client.post(f"/sessions/{SESSION_ID}/finish", json={"fatigue_after": 6})
+    response = client.post(
+        f"/sessions/{SESSION_ID}/finish",
+        json={"notes_after": "Treino forte e consistente."},
+    )
 
     assert response.status_code == 200
     assert response.json()["status"] == "COMPLETED"
@@ -165,7 +160,7 @@ def test_finish_session_uses_current_user_id() -> None:
     )
     assert str(session_id) == SESSION_ID
     assert user_id == USER_ID
-    assert payload.fatigue_after == 6
+    assert payload.notes_after == "Treino forte e consistente."
 
 
 def test_cancel_session_uses_current_user_id() -> None:

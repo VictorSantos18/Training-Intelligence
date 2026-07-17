@@ -3,29 +3,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ProtectedView } from "@/components/layout/protected-view";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
-  cancelTrainingSession,
   createTrainingSession,
-  finishTrainingSession,
   listSkills,
   listTrainingSessions,
 } from "@/lib/api";
 import type {
   Skill,
   TrainingSession,
-  TrainingSessionFinishFormValues,
   TrainingSessionFormValues,
   TrainingSessionStatus,
 } from "@/types";
 
-import { SessionFinishForm } from "./session-finish-form";
 import { SessionForm } from "./session-form";
-import {
-  buildCreateSessionPayload,
-  buildFinishSessionPayload,
-  sessionStatusLabels,
-} from "./session-formatters";
+import { buildCreateSessionPayload, sessionStatusLabels } from "./session-formatters";
 import { SessionList } from "./session-list";
 import styles from "./sessions-page.module.css";
 
@@ -45,9 +36,6 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
   const [selectedSession, setSelectedSession] = useState<TrainingSession | null>(null);
   const [selectedSkillId, setSelectedSkillId] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
-  const [sessionToCancel, setSessionToCancel] = useState<TrainingSession | null>(null);
-  const [sessionToFinish, setSessionToFinish] = useState<TrainingSession | null>(null);
-  const [isCancelling, setIsCancelling] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -104,15 +92,6 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
     );
   }, [sessions]);
 
-  function updateSessionInState(updatedSession: TrainingSession) {
-    setSessions((currentSessions) =>
-      currentSessions.map((session) =>
-        session.id === updatedSession.id ? updatedSession : session,
-      ),
-    );
-    setSelectedSession(updatedSession);
-  }
-
   async function handleCreateSession(values: TrainingSessionFormValues) {
     setFeedback(null);
     setError(null);
@@ -130,49 +109,6 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
     }
   }
 
-  async function handleFinishSession(values: TrainingSessionFinishFormValues) {
-    if (!sessionToFinish) {
-      return;
-    }
-
-    setFeedback(null);
-    setError(null);
-
-    try {
-      const finishedSession = await finishTrainingSession(
-        accessToken,
-        sessionToFinish.id,
-        buildFinishSessionPayload(values),
-      );
-      updateSessionInState(finishedSession);
-      setSessionToFinish(null);
-      setFeedback("Sessao finalizada.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel finalizar a sessao.");
-    }
-  }
-
-  async function confirmCancelSession() {
-    if (!sessionToCancel) {
-      return;
-    }
-
-    setFeedback(null);
-    setError(null);
-    setIsCancelling(true);
-
-    try {
-      const cancelledSession = await cancelTrainingSession(accessToken, sessionToCancel.id);
-      updateSessionInState(cancelledSession);
-      setSessionToCancel(null);
-      setFeedback("Sessao cancelada.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Nao foi possivel cancelar a sessao.");
-    } finally {
-      setIsCancelling(false);
-    }
-  }
-
   return (
     <section className={styles.page}>
       <header className={styles.header}>
@@ -180,8 +116,8 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
           <p className={styles.eyebrow}>Sessoes</p>
           <h2>Registro base dos seus treinos.</h2>
           <p>
-            Crie sessoes, acompanhe check-ins iniciais e feche o ciclo do treino com
-            percepcao de fadiga e performance.
+            Crie sessoes, acompanhe energia e sono, e feche o ciclo do treino com suas
+            notas finais.
           </p>
         </div>
         <button className={styles.refresh} type="button" onClick={loadData}>
@@ -202,7 +138,7 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
         <aside className={styles.formPanel}>
           <div className={styles.panelHeader}>
             <h3>Nova sessao</h3>
-            <p>Registre o contexto antes do treino para comparar desempenho depois.</p>
+            <p>Registre apenas o contexto essencial antes do treino.</p>
           </div>
           <SessionForm skills={skills} onSubmit={handleCreateSession} />
         </aside>
@@ -254,102 +190,7 @@ function SessionsContent({ accessToken }: SessionsContentProps) {
             onSelect={setSelectedSession}
           />
         </section>
-
-        <aside className={styles.detailPanel}>
-          <div className={styles.panelHeader}>
-            <h3>Detalhe</h3>
-            <p>Visao inicial da sessao selecionada.</p>
-          </div>
-
-          {selectedSession ? (
-            <div className={styles.detail}>
-              <div>
-                <span className={styles.status}>{sessionStatusLabels[selectedSession.status]}</span>
-                <h4>
-                  {selectedSession.skill_id
-                    ? skillNameById[selectedSession.skill_id] ?? "Skill nao encontrada"
-                    : "Sessao geral"}
-                </h4>
-                <p>{new Date(selectedSession.started_at).toLocaleString("pt-BR")}</p>
-              </div>
-
-              <dl className={styles.metrics}>
-                <div>
-                  <dt>Peso</dt>
-                  <dd>{selectedSession.body_weight_kg ?? "-"}</dd>
-                </div>
-                <div>
-                  <dt>Sono</dt>
-                  <dd>{selectedSession.sleep_hours ?? "-"}</dd>
-                </div>
-                <div>
-                  <dt>Energia</dt>
-                  <dd>{selectedSession.energy_before ?? "-"}</dd>
-                </div>
-                <div>
-                  <dt>Fadiga inicial</dt>
-                  <dd>{selectedSession.fatigue_before ?? "-"}</dd>
-                </div>
-                <div>
-                  <dt>Fadiga final</dt>
-                  <dd>{selectedSession.fatigue_after ?? "-"}</dd>
-                </div>
-                <div>
-                  <dt>Performance</dt>
-                  <dd>{selectedSession.performance_rating ?? "-"}</dd>
-                </div>
-              </dl>
-
-              {selectedSession.notes_before ? (
-                <p className={styles.notes}>{selectedSession.notes_before}</p>
-              ) : null}
-              {selectedSession.notes_after ? (
-                <p className={styles.notes}>{selectedSession.notes_after}</p>
-              ) : null}
-
-              {selectedSession.status === "IN_PROGRESS" ? (
-                <div className={styles.detailActions}>
-                  <button type="button" onClick={() => setSessionToFinish(selectedSession)}>
-                    Finalizar
-                  </button>
-                  <button
-                    className={styles.danger}
-                    type="button"
-                    onClick={() => setSessionToCancel(selectedSession)}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <p className={styles.emptyDetail}>Selecione uma sessao para ver os detalhes.</p>
-          )}
-        </aside>
       </div>
-
-      {sessionToFinish ? (
-        <SessionFinishForm
-          session={sessionToFinish}
-          onCancel={() => setSessionToFinish(null)}
-          onSubmit={handleFinishSession}
-        />
-      ) : null}
-
-      <ConfirmDialog
-        confirmLabel="Cancelar sessao"
-        description={
-          sessionToCancel
-            ? "A sessao sera marcada como cancelada. O registro permanece no historico."
-            : ""
-        }
-        isOpen={sessionToCancel !== null}
-        isProcessing={isCancelling}
-        title="Confirmar cancelamento"
-        tone="danger"
-        onCancel={() => setSessionToCancel(null)}
-        onConfirm={() => void confirmCancelSession()}
-      />
     </section>
   );
 }

@@ -18,17 +18,12 @@ const zeroToTenString = z
 const sessionFormSchema = z.object({
   skill_id: z.string().optional().default(""),
   started_at: z.string().min(1, "Informe o inicio da sessao."),
-  body_weight_kg: z.string().optional().default(""),
   sleep_hours: z
     .string()
     .refine((value) => value === "" || (Number(value) >= 0 && Number(value) <= 24), {
       message: "Use um valor entre 0 e 24.",
     }),
-  sleep_quality: zeroToTenString,
   energy_before: zeroToTenString,
-  motivation_before: zeroToTenString,
-  fatigue_before: zeroToTenString,
-  notes_before: z.string().optional().default(""),
 });
 
 type SessionFormProps = {
@@ -47,13 +42,8 @@ export function SessionForm({ skills, onSubmit }: SessionFormProps) {
     defaultValues: {
       skill_id: "",
       started_at: toDatetimeLocalValue(),
-      body_weight_kg: "",
       sleep_hours: "",
-      sleep_quality: "",
       energy_before: "",
-      motivation_before: "",
-      fatigue_before: "",
-      notes_before: "",
     },
   });
 
@@ -62,13 +52,8 @@ export function SessionForm({ skills, onSubmit }: SessionFormProps) {
     reset({
       skill_id: "",
       started_at: toDatetimeLocalValue(),
-      body_weight_kg: "",
       sleep_hours: "",
-      sleep_quality: "",
       energy_before: "",
-      motivation_before: "",
-      fatigue_before: "",
-      notes_before: "",
     });
   }
 
@@ -96,64 +81,34 @@ export function SessionForm({ skills, onSubmit }: SessionFormProps) {
 
       <div className={styles.grid}>
         <label className={styles.field}>
-          <span>Peso kg</span>
-          <input className={styles.input} min="0" step="0.01" type="number" {...register("body_weight_kg")} />
-        </label>
-
-        <label className={styles.field}>
           <span>Sono h</span>
-          <input className={styles.input} min="0" max="24" step="0.25" type="number" {...register("sleep_hours")} />
+          <input
+            className={styles.input}
+            max="24"
+            min="0"
+            step="0.25"
+            type="number"
+            {...register("sleep_hours")}
+          />
           {errors.sleep_hours ? (
             <small className={styles.error}>{errors.sleep_hours.message}</small>
-          ) : null}
-        </label>
-      </div>
-
-      <div className={styles.grid}>
-        <label className={styles.field}>
-          <span>Qualidade sono</span>
-          <input className={styles.input} min="0" max="10" type="number" {...register("sleep_quality")} />
-          {errors.sleep_quality ? (
-            <small className={styles.error}>{errors.sleep_quality.message}</small>
           ) : null}
         </label>
 
         <label className={styles.field}>
           <span>Energia</span>
-          <input className={styles.input} min="0" max="10" type="number" {...register("energy_before")} />
+          <input
+            className={styles.input}
+            max="10"
+            min="0"
+            type="number"
+            {...register("energy_before")}
+          />
           {errors.energy_before ? (
             <small className={styles.error}>{errors.energy_before.message}</small>
           ) : null}
         </label>
       </div>
-
-      <div className={styles.grid}>
-        <label className={styles.field}>
-          <span>Motivacao</span>
-          <input className={styles.input} min="0" max="10" type="number" {...register("motivation_before")} />
-          {errors.motivation_before ? (
-            <small className={styles.error}>{errors.motivation_before.message}</small>
-          ) : null}
-        </label>
-
-        <label className={styles.field}>
-          <span>Fadiga</span>
-          <input className={styles.input} min="0" max="10" type="number" {...register("fatigue_before")} />
-          {errors.fatigue_before ? (
-            <small className={styles.error}>{errors.fatigue_before.message}</small>
-          ) : null}
-        </label>
-      </div>
-
-      <label className={styles.field}>
-        <span>Notas antes</span>
-        <textarea
-          className={styles.textarea}
-          placeholder="Contexto, desconfortos, foco do treino..."
-          rows={4}
-          {...register("notes_before")}
-        />
-      </label>
 
       <button className={styles.submit} type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Criando..." : "Criar sessao"}

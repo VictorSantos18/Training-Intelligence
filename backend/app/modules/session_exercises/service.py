@@ -9,6 +9,7 @@ from app.modules.session_exercises.exceptions import (
     SessionExerciseExerciseNotFoundError,
     SessionExerciseNotFoundError,
     SessionExerciseOrderAlreadyExistsError,
+    SessionExerciseSkillMismatchError,
     SessionExerciseTrainingSessionClosedError,
     SessionExerciseTrainingSessionNotFoundError,
 )
@@ -33,6 +34,25 @@ class SessionExerciseService:
         )
         self.exercise_repository = exercise_repository or ExerciseRepository()
 
+    async def list_session_exercises(
+        self,
+        session: AsyncSession,
+        training_session_id: UUID,
+        user_id: str,
+    ) -> list[SessionExercise]:
+        training_session = await self.training_session_repository.get_by_id_and_user(
+            session,
+            training_session_id,
+            user_id,
+        )
+        if training_session is None:
+            raise SessionExerciseTrainingSessionNotFoundError
+
+        return await self.session_exercise_repository.list_by_training_session(
+            session,
+            training_session_id,
+        )
+
     async def create_session_exercise(
         self,
         session: AsyncSession,
@@ -56,6 +76,10 @@ class SessionExerciseService:
         )
         if exercise is None:
             raise SessionExerciseExerciseNotFoundError
+        self._ensure_exercise_matches_training_session_skill(
+            exercise.skill_id,
+            training_session.skill_id,
+        )
 
         try:
             session_exercise = await self.session_exercise_repository.create(
@@ -130,3 +154,10 @@ class SessionExerciseService:
         if status != TrainingSessionStatus.in_progress.value:
             raise SessionExerciseTrainingSessionClosedError
 
+    def _ensure_exercise_matches_training_session_skill(
+        self,
+        exercise_skill_id: str | None,
+        training_session_skill_id: str | None,
+    ) -> None:
+        if exercise_skill_id != training_session_skill_id:
+            raise SessionExerciseSkillMismatchError

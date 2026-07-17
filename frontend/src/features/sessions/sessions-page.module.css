@@ -86,14 +86,13 @@
 
 .content {
   display: grid;
-  grid-template-columns: minmax(290px, 370px) minmax(320px, 1fr) minmax(280px, 360px);
+  grid-template-columns: minmax(290px, 370px) minmax(320px, 1fr);
   gap: 18px;
   align-items: start;
 }
 
 .formPanel,
-.listPanel,
-.detailPanel {
+.listPanel {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
@@ -167,121 +166,6 @@
   color: var(--color-danger);
 }
 
-.detail {
-  display: grid;
-  gap: 18px;
-}
-
-.detail h4,
-.detail p {
-  margin: 0;
-}
-
-.detail h4 {
-  margin-top: 10px;
-  color: var(--color-text);
-  font-size: 1.24rem;
-}
-
-.detail p {
-  margin-top: 6px;
-  color: var(--color-muted);
-}
-
-.status {
-  width: fit-content;
-  border: 1px solid rgba(130, 10, 209, 0.36);
-  border-radius: 999px;
-  background: rgba(130, 10, 209, 0.16);
-  color: var(--color-primary-soft);
-  padding: 5px 9px;
-  font-size: 0.74rem;
-  font-weight: 800;
-}
-
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0;
-}
-
-.metrics div {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface-elevated);
-  padding: 12px;
-}
-
-.metrics dt,
-.metrics dd {
-  margin: 0;
-}
-
-.metrics dt {
-  color: var(--color-muted);
-  font-size: 0.76rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.metrics dd {
-  margin-top: 6px;
-  color: var(--color-text);
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.notes {
-  border-left: 3px solid var(--color-primary);
-  padding-left: 12px;
-  line-height: 1.6;
-}
-
-.detailActions {
-  display: flex;
-  gap: 10px;
-}
-
-.detailActions button {
-  min-height: 40px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-  padding: 0 14px;
-  font-weight: 800;
-}
-
-.detailActions button:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary-soft);
-}
-
-.detailActions .danger:hover {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
-
-.emptyDetail {
-  margin: 0;
-  border: 1px dashed var(--color-border);
-  border-radius: 8px;
-  color: var(--color-muted);
-  padding: 18px;
-}
-
-@media (max-width: 1320px) {
-  .content {
-    grid-template-columns: minmax(290px, 380px) 1fr;
-  }
-
-  .detailPanel {
-    grid-column: 1 / -1;
-  }
-}
-
 @media (max-width: 920px) {
   .content {
     grid-template-columns: 1fr;
@@ -298,8 +182,7 @@
   }
 
   .summary,
-  .filters,
-  .metrics {
+  .filters {
     grid-template-columns: 1fr;
   }
 }

@@ -53,13 +53,8 @@ class TrainingSessionRepository:
             user_id=user_id,
             skill_id=str(data.skill_id) if data.skill_id is not None else None,
             started_at=data.started_at,
-            body_weight_kg=data.body_weight_kg,
             sleep_hours=data.sleep_hours,
-            sleep_quality=data.sleep_quality,
             energy_before=data.energy_before,
-            motivation_before=data.motivation_before,
-            fatigue_before=data.fatigue_before,
-            notes_before=data.notes_before,
         )
         session.add(training_session)
         await session.flush()

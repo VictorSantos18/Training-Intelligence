@@ -1,0 +1,91 @@
+.list {
+  display: grid;
+  gap: 14px;
+}
+
+.card {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-elevated);
+  padding: 14px;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+}
+
+.header span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(130, 10, 209, 0.2);
+  color: var(--color-primary-soft);
+  font-weight: 900;
+}
+
+.header h5,
+.header p {
+  margin: 0;
+}
+
+.header h5 {
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.header p {
+  margin-top: 4px;
+  color: var(--color-muted);
+}
+
+.sets {
+  display: grid;
+  gap: 8px;
+}
+
+.setCard {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 9px;
+}
+
+.setRow {
+  display: grid;
+  grid-template-columns: 76px repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.setRow strong {
+  color: var(--color-text);
+}
+
+.setNotes {
+  margin: 8px 0 0;
+  border-left: 3px solid var(--color-primary);
+  color: var(--color-muted);
+  line-height: 1.5;
+  padding-left: 10px;
+}
+
+.empty,
+.emptyInline {
+  margin: 0;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  color: var(--color-muted);
+  padding: 12px;
+}
+
+@media (max-width: 760px) {
+  .setRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}

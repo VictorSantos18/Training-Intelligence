@@ -10,6 +10,7 @@ from app.modules.session_exercises.exceptions import (
     SessionExerciseExerciseNotFoundError,
     SessionExerciseNotFoundError,
     SessionExerciseOrderAlreadyExistsError,
+    SessionExerciseSkillMismatchError,
     SessionExerciseTrainingSessionClosedError,
     SessionExerciseTrainingSessionNotFoundError,
 )
@@ -22,6 +23,28 @@ from app.modules.session_exercises.service import SessionExerciseService
 
 router = APIRouter(tags=["session-exercises"])
 session_exercise_service = SessionExerciseService()
+
+
+@router.get(
+    "/sessions/{session_id}/exercises",
+    response_model=list[SessionExerciseRead],
+)
+async def list_session_exercises(
+    session_id: UUID,
+    current_user: Annotated[CurrentUser, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> list[SessionExerciseRead]:
+    try:
+        return await session_exercise_service.list_session_exercises(
+            session,
+            session_id,
+            current_user.id,
+        )
+    except SessionExerciseTrainingSessionNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Training session not found",
+        ) from exc
 
 
 @router.post(
@@ -56,6 +79,11 @@ async def create_session_exercise(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Training session is already closed",
+        ) from exc
+    except SessionExerciseSkillMismatchError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="Exercise does not belong to the training session skill",
         ) from exc
     except SessionExerciseOrderAlreadyExistsError as exc:
         raise HTTPException(
@@ -122,4 +150,3 @@ async def delete_session_exercise(
         ) from exc
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-

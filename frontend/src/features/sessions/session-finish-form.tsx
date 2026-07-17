@@ -6,19 +6,8 @@ import { z } from "zod";
 
 import type { TrainingSession, TrainingSessionFinishFormValues } from "@/types";
 
+import { getDefaultFinishedAtValue } from "./session-formatters";
 import styles from "./session-finish-form.module.css";
-
-const zeroToTenString = z
-  .string()
-  .refine((value) => value === "" || (Number(value) >= 0 && Number(value) <= 10), {
-    message: "Use um valor de 0 a 10.",
-  });
-
-const finishFormSchema = z.object({
-  fatigue_after: zeroToTenString,
-  performance_rating: zeroToTenString,
-  notes_after: z.string().optional().default(""),
-});
 
 type SessionFinishFormProps = {
   session: TrainingSession;
@@ -27,6 +16,16 @@ type SessionFinishFormProps = {
 };
 
 export function SessionFinishForm({ session, onCancel, onSubmit }: SessionFinishFormProps) {
+  const finishFormSchema = z
+    .object({
+      finished_at: z.string().min(1, "Informe o horario de termino."),
+      notes_after: z.string().optional().default(""),
+    })
+    .refine((values) => new Date(values.finished_at) > new Date(session.started_at), {
+      message: "O termino precisa ser posterior ao inicio da sessao.",
+      path: ["finished_at"],
+    });
+
   const {
     register,
     handleSubmit,
@@ -34,8 +33,7 @@ export function SessionFinishForm({ session, onCancel, onSubmit }: SessionFinish
   } = useForm<TrainingSessionFinishFormValues>({
     resolver: zodResolver(finishFormSchema),
     defaultValues: {
-      fatigue_after: "",
-      performance_rating: "",
+      finished_at: getDefaultFinishedAtValue(session.started_at),
       notes_after: "",
     },
   });
@@ -57,23 +55,11 @@ export function SessionFinishForm({ session, onCancel, onSubmit }: SessionFinish
         </header>
 
         <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
-          <div className={styles.grid}>
-            <label className={styles.field}>
-              <span>Fadiga final</span>
-              <input min="0" max="10" type="number" {...register("fatigue_after")} />
-              {errors.fatigue_after ? (
-                <small>{errors.fatigue_after.message}</small>
-              ) : null}
-            </label>
-
-            <label className={styles.field}>
-              <span>Performance</span>
-              <input min="0" max="10" type="number" {...register("performance_rating")} />
-              {errors.performance_rating ? (
-                <small>{errors.performance_rating.message}</small>
-              ) : null}
-            </label>
-          </div>
+          <label className={styles.field}>
+            <span>Termino</span>
+            <input type="datetime-local" {...register("finished_at")} />
+            {errors.finished_at ? <small>{errors.finished_at.message}</small> : null}
+          </label>
 
           <label className={styles.field}>
             <span>Notas depois</span>

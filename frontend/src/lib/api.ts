@@ -1,12 +1,19 @@
 import type {
   ApiErrorPayload,
+  BodyRegion,
   CurrentUser,
   Exercise,
   ExerciseCreatePayload,
   ExerciseUpdatePayload,
+  PainRecord,
+  PainRecordCreatePayload,
+  SessionExercise,
+  SessionExerciseCreatePayload,
   Skill,
   SkillCreatePayload,
   SkillUpdatePayload,
+  TrainingSet,
+  TrainingSetCreatePayload,
   TrainingSession,
   TrainingSessionCreatePayload,
   TrainingSessionFinishPayload,
@@ -154,6 +161,10 @@ export function listTrainingSessions(
   });
 }
 
+export function getTrainingSession(accessToken: string, sessionId: string) {
+  return apiFetch<TrainingSession>(`/sessions/${sessionId}`, { accessToken });
+}
+
 export function createTrainingSession(
   accessToken: string,
   payload: TrainingSessionCreatePayload,
@@ -181,5 +192,69 @@ export function cancelTrainingSession(accessToken: string, sessionId: string) {
   return apiFetch<TrainingSession>(`/sessions/${sessionId}/cancel`, {
     method: "POST",
     accessToken,
+  });
+}
+
+export function listSessionExercises(accessToken: string, sessionId: string) {
+  return apiFetch<SessionExercise[]>(`/sessions/${sessionId}/exercises`, { accessToken });
+}
+
+export function createSessionExercise(
+  accessToken: string,
+  sessionId: string,
+  payload: SessionExerciseCreatePayload,
+) {
+  return apiFetch<SessionExercise>(`/sessions/${sessionId}/exercises`, {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listTrainingSets(accessToken: string, sessionExerciseId: string) {
+  return apiFetch<TrainingSet[]>(`/session-exercises/${sessionExerciseId}/sets`, {
+    accessToken,
+  });
+}
+
+export function createTrainingSet(
+  accessToken: string,
+  sessionExerciseId: string,
+  payload: TrainingSetCreatePayload,
+) {
+  return apiFetch<TrainingSet>(`/session-exercises/${sessionExerciseId}/sets`, {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listBodyRegions(accessToken: string) {
+  return apiFetch<BodyRegion[]>("/body-regions", { accessToken });
+}
+
+export function listPainRecords(
+  accessToken: string,
+  filters: { trainingSessionId?: string; trainingSetId?: string } = {},
+) {
+  const params = new URLSearchParams();
+  if (filters.trainingSessionId) {
+    params.set("training_session_id", filters.trainingSessionId);
+  }
+  if (filters.trainingSetId) {
+    params.set("training_set_id", filters.trainingSetId);
+  }
+
+  const query = params.toString();
+  return apiFetch<PainRecord[]>(`/pain-records${query ? `?${query}` : ""}`, {
+    accessToken,
+  });
+}
+
+export function createPainRecord(accessToken: string, payload: PainRecordCreatePayload) {
+  return apiFetch<PainRecord>("/pain-records", {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify(payload),
   });
 }

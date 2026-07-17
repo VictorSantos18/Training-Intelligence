@@ -9,6 +9,18 @@ from app.modules.session_exercises.schemas import SessionExerciseCreate, Session
 
 
 class SessionExerciseRepository:
+    async def list_by_training_session(
+        self,
+        session: AsyncSession,
+        training_session_id: UUID,
+    ) -> list[SessionExercise]:
+        result = await session.execute(
+            select(SessionExercise)
+            .where(SessionExercise.session_id == str(training_session_id))
+            .order_by(SessionExercise.execution_order.asc())
+        )
+        return list(result.scalars().all())
+
     async def get_by_id_and_user(
         self,
         session: AsyncSession,
@@ -57,4 +69,3 @@ class SessionExerciseRepository:
     async def delete(self, session: AsyncSession, session_exercise: SessionExercise) -> None:
         await session.delete(session_exercise)
         await session.flush()
-

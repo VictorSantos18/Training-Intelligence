@@ -17,3 +17,6 @@ class SessionExerciseExerciseNotFoundError(Exception):
 class SessionExerciseTrainingSessionClosedError(Exception):
     pass
 
+
+class SessionExerciseSkillMismatchError(Exception):
+    pass

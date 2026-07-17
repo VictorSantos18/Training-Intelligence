@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import type { TrainingSession } from "@/types";
 
 import { sessionStatusLabels } from "./session-formatters";
@@ -42,16 +44,22 @@ export function SessionList({
         const isSelected = selectedSessionId === session.id;
 
         return (
-          <button
-            className={isSelected ? styles.cardSelected : styles.card}
-            key={session.id}
-            type="button"
-            onClick={() => onSelect(session)}
-          >
-            <span className={styles.status}>{sessionStatusLabels[session.status]}</span>
-            <strong>{skillLabel}</strong>
-            <span>{new Date(session.started_at).toLocaleString("pt-BR")}</span>
-          </button>
+          <article className={isSelected ? styles.cardSelected : styles.card} key={session.id}>
+            <button className={styles.selectButton} type="button" onClick={() => onSelect(session)}>
+              <span className={styles.status}>{sessionStatusLabels[session.status]}</span>
+              <strong>{skillLabel}</strong>
+              <span>{new Date(session.started_at).toLocaleString("pt-BR")}</span>
+              {session.status === "COMPLETED" && session.notes_after ? (
+                <span className={styles.sessionNote}>{session.notes_after}</span>
+              ) : null}
+            </button>
+
+            {isSelected ? (
+              <Link className={styles.moreLink} href={`/sessions/${session.id}`}>
+                Ver mais
+              </Link>
+            ) : null}
+          </article>
         );
       })}
     </div>

@@ -87,15 +87,8 @@ export type TrainingSession = {
   skill_id: string | null;
   started_at: string;
   finished_at: string | null;
-  body_weight_kg: string | null;
   sleep_hours: string | null;
-  sleep_quality: number | null;
   energy_before: number | null;
-  motivation_before: number | null;
-  fatigue_before: number | null;
-  fatigue_after: number | null;
-  performance_rating: number | null;
-  notes_before: string | null;
   notes_after: string | null;
   status: TrainingSessionStatus;
   created_at: string;
@@ -105,36 +98,145 @@ export type TrainingSession = {
 export type TrainingSessionFormValues = {
   skill_id: string;
   started_at: string;
-  body_weight_kg: string;
   sleep_hours: string;
-  sleep_quality: string;
   energy_before: string;
-  motivation_before: string;
-  fatigue_before: string;
-  notes_before: string;
 };
 
 export type TrainingSessionCreatePayload = {
   skill_id?: string | null;
   started_at: string;
-  body_weight_kg?: string | null;
   sleep_hours?: string | null;
-  sleep_quality?: number | null;
   energy_before?: number | null;
-  motivation_before?: number | null;
-  fatigue_before?: number | null;
-  notes_before?: string | null;
 };
 
 export type TrainingSessionFinishFormValues = {
-  fatigue_after: string;
-  performance_rating: string;
+  finished_at: string;
   notes_after: string;
 };
 
 export type TrainingSessionFinishPayload = {
   finished_at?: string | null;
-  fatigue_after?: number | null;
-  performance_rating?: number | null;
   notes_after?: string | null;
+};
+
+export type SessionExercise = {
+  id: string;
+  session_id: string;
+  exercise_id: string;
+  execution_order: number;
+  notes: string | null;
+  created_at: string;
+};
+
+export type SessionExerciseFormValues = {
+  exercise_id: string;
+  execution_order: string;
+  notes: string;
+};
+
+export type SessionExerciseCreatePayload = {
+  exercise_id: string;
+  execution_order: number;
+  notes?: string | null;
+};
+
+export type TrainingSetResult = "SUCCESS" | "PARTIAL" | "FAILED" | "SKIPPED";
+
+export type TechnicalQuality = "EXCELLENT" | "GOOD" | "ACCEPTABLE" | "POOR";
+
+export type TrainingSet = {
+  id: string;
+  session_exercise_id: string;
+  set_number: number;
+  repetitions: number | null;
+  duration_seconds: string | null;
+  assistance_level: string | null;
+  rpe: string | null;
+  pain_during: number | null;
+  result: TrainingSetResult;
+  technical_quality: TechnicalQuality | null;
+  rest_seconds: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TrainingSetFormValues = {
+  set_number: string;
+  repetitions: string;
+  duration_seconds: string;
+  assistance_level: string;
+  rpe: string;
+  pain_during: string;
+  result: TrainingSetResult;
+  technical_quality: "" | TechnicalQuality;
+  rest_seconds: string;
+  notes: string;
+};
+
+export type TrainingSetCreatePayload = {
+  set_number: number;
+  repetitions?: number | null;
+  duration_seconds?: string | null;
+  assistance_level?: string | null;
+  rpe?: string | null;
+  pain_during?: number | null;
+  result: TrainingSetResult;
+  technical_quality?: TechnicalQuality | null;
+  rest_seconds?: number | null;
+  notes?: string | null;
+};
+
+export type BodyRegion = {
+  id: string;
+  code: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PainRecordMoment =
+  | "PRE_SESSION"
+  | "DURING_SET"
+  | "POST_SESSION"
+  | "CHECKIN_24H"
+  | "CHECKIN_48H";
+
+export type PainRecordSide = "LEFT" | "RIGHT" | "BILATERAL" | "NOT_APPLICABLE";
+
+export type PainRecord = {
+  id: string;
+  training_session_id: string | null;
+  training_set_id: string | null;
+  body_region_id: string;
+  occurred_at: string;
+  side: PainRecordSide;
+  moment: PainRecordMoment;
+  intensity: number;
+  description: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type PainRecordFormValues = {
+  training_set_id: string;
+  body_region_id: string;
+  side: PainRecordSide;
+  moment: PainRecordMoment;
+  intensity: string;
+  description: string;
+  notes: string;
+};
+
+export type PainRecordCreatePayload = {
+  training_session_id?: string | null;
+  training_set_id?: string | null;
+  body_region_id: string;
+  side: PainRecordSide;
+  moment: PainRecordMoment;
+  intensity: number;
+  description?: string | null;
+  notes?: string | null;
 };

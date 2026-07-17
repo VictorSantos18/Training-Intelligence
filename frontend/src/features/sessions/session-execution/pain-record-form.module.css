@@ -1,0 +1,52 @@
+.form {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-elevated);
+  padding: 14px;
+}
+
+.form label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 0 10px;
+}
+
+.form input,
+.form select {
+  min-height: 40px;
+}
+
+.form textarea {
+  min-height: 84px;
+  resize: vertical;
+  padding-top: 10px;
+}
+
+.form small {
+  color: var(--color-danger);
+}
+
+.form button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 800;
+}
