@@ -50,7 +50,12 @@ export function AppShell({ user, children }: AppShellProps) {
           >
             Exercicios
           </Link>
-          <span className={styles.navItemMuted}>Sessoes</span>
+          <Link
+            className={pathname === "/sessions" ? styles.navItemActive : styles.navItem}
+            href="/sessions"
+          >
+            Sessoes
+          </Link>
         </nav>
 
         <div className={styles.account}>

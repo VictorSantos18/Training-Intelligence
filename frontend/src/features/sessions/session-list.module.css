@@ -1,0 +1,64 @@
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.card,
+.cardSelected {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-elevated);
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 16px;
+  text-align: left;
+}
+
+.card:hover,
+.cardSelected {
+  border-color: rgba(192, 132, 252, 0.52);
+  background: rgba(130, 10, 209, 0.12);
+}
+
+.card strong,
+.cardSelected strong {
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.status {
+  width: fit-content;
+  border: 1px solid rgba(130, 10, 209, 0.36);
+  border-radius: 999px;
+  background: rgba(130, 10, 209, 0.16);
+  color: var(--color-primary-soft);
+  padding: 5px 9px;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.empty,
+.emptyState {
+  margin: 0;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 24px;
+  color: var(--color-muted);
+}
+
+.emptyState {
+  display: grid;
+  gap: 8px;
+}
+
+.emptyState h4,
+.emptyState p {
+  margin: 0;
+}
+
+.emptyState h4 {
+  color: var(--color-text);
+}

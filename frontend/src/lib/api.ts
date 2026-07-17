@@ -7,6 +7,10 @@ import type {
   Skill,
   SkillCreatePayload,
   SkillUpdatePayload,
+  TrainingSession,
+  TrainingSessionCreatePayload,
+  TrainingSessionFinishPayload,
+  TrainingSessionStatus,
 } from "@/types";
 
 export class ApiError extends Error {
@@ -128,6 +132,54 @@ export function updateExercise(
 export function deactivateExercise(accessToken: string, exerciseId: string) {
   return apiFetch<Exercise>(`/exercises/${exerciseId}`, {
     method: "DELETE",
+    accessToken,
+  });
+}
+
+export function listTrainingSessions(
+  accessToken: string,
+  filters: { skillId?: string; status?: TrainingSessionStatus } = {},
+) {
+  const params = new URLSearchParams();
+  if (filters.skillId) {
+    params.set("skill_id", filters.skillId);
+  }
+  if (filters.status) {
+    params.set("status", filters.status);
+  }
+
+  const query = params.toString();
+  return apiFetch<TrainingSession[]>(`/sessions${query ? `?${query}` : ""}`, {
+    accessToken,
+  });
+}
+
+export function createTrainingSession(
+  accessToken: string,
+  payload: TrainingSessionCreatePayload,
+) {
+  return apiFetch<TrainingSession>("/sessions", {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function finishTrainingSession(
+  accessToken: string,
+  sessionId: string,
+  payload: TrainingSessionFinishPayload,
+) {
+  return apiFetch<TrainingSession>(`/sessions/${sessionId}/finish`, {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function cancelTrainingSession(accessToken: string, sessionId: string) {
+  return apiFetch<TrainingSession>(`/sessions/${sessionId}/cancel`, {
+    method: "POST",
     accessToken,
   });
 }
