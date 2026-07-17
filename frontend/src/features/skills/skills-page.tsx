@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ProtectedView } from "@/components/layout/protected-view";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { createSkill, deleteSkill, listSkills, updateSkill } from "@/lib/api";
 import type { Skill, SkillFormValues, SkillStatus } from "@/types";
 
@@ -31,6 +32,8 @@ type SkillsContentProps = {
 function SkillsContent({ accessToken }: SkillsContentProps) {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -103,22 +106,25 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
     }
   }
 
-  async function handleDeleteSkill(skill: Skill) {
-    const confirmed = window.confirm(`Excluir a skill "${skill.name}"?`);
-    if (!confirmed) {
+  async function confirmDeleteSkill() {
+    if (!skillToDelete) {
       return;
     }
 
     setFeedback(null);
     setError(null);
+    setIsDeleting(true);
     try {
-      await deleteSkill(accessToken, skill.id);
+      await deleteSkill(accessToken, skillToDelete.id);
       setSkills((currentSkills) =>
-        currentSkills.filter((currentSkill) => currentSkill.id !== skill.id),
+        currentSkills.filter((currentSkill) => currentSkill.id !== skillToDelete.id),
       );
+      setSkillToDelete(null);
       setFeedback("Skill excluida.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nao foi possivel excluir a skill.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -168,12 +174,27 @@ function SkillsContent({ accessToken }: SkillsContentProps) {
           <SkillList
             isLoading={isLoading}
             skills={skills}
-            onDelete={handleDeleteSkill}
+            onDelete={setSkillToDelete}
             onStatusChange={handleStatusChange}
             onUpdate={handleUpdateSkill}
           />
         </section>
       </div>
+
+      <ConfirmDialog
+        confirmLabel="Excluir skill"
+        description={
+          skillToDelete
+            ? `A skill "${skillToDelete.name}" sera removida. Essa acao deve ser usada apenas para registros de teste ou criados por engano.`
+            : ""
+        }
+        isOpen={skillToDelete !== null}
+        isProcessing={isDeleting}
+        title="Confirmar exclusao"
+        tone="danger"
+        onCancel={() => setSkillToDelete(null)}
+        onConfirm={() => void confirmDeleteSkill()}
+      />
     </section>
   );
 }

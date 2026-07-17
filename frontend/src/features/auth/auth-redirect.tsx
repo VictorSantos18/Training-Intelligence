@@ -3,9 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { LoadingState } from "@/components/ui/loading-state";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
-
-import styles from "@/app/page.module.css";
 
 export function AuthRedirect() {
   const router = useRouter();
@@ -25,8 +24,9 @@ export function AuthRedirect() {
   }, [router]);
 
   return (
-    <main className={styles.page}>
-      <p className={styles.status}>Carregando sua area de treino...</p>
-    </main>
+    <LoadingState
+      title="Carregando sua area de treino"
+      message="Estamos direcionando voce para o melhor ponto de partida."
+    />
   );
 }

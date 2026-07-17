@@ -1,6 +1,9 @@
 import type {
   ApiErrorPayload,
   CurrentUser,
+  Exercise,
+  ExerciseCreatePayload,
+  ExerciseUpdatePayload,
   Skill,
   SkillCreatePayload,
   SkillUpdatePayload,
@@ -81,6 +84,49 @@ export function updateSkill(accessToken: string, skillId: string, payload: Skill
 
 export function deleteSkill(accessToken: string, skillId: string) {
   return apiFetch<void>(`/skills/${skillId}`, {
+    method: "DELETE",
+    accessToken,
+  });
+}
+
+export function listExercises(
+  accessToken: string,
+  filters: { skillId?: string; isActive?: boolean } = {},
+) {
+  const params = new URLSearchParams();
+  if (filters.skillId) {
+    params.set("skill_id", filters.skillId);
+  }
+  if (filters.isActive !== undefined) {
+    params.set("is_active", String(filters.isActive));
+  }
+
+  const query = params.toString();
+  return apiFetch<Exercise[]>(`/exercises${query ? `?${query}` : ""}`, { accessToken });
+}
+
+export function createExercise(accessToken: string, payload: ExerciseCreatePayload) {
+  return apiFetch<Exercise>("/exercises", {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateExercise(
+  accessToken: string,
+  exerciseId: string,
+  payload: ExerciseUpdatePayload,
+) {
+  return apiFetch<Exercise>(`/exercises/${exerciseId}`, {
+    method: "PATCH",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deactivateExercise(accessToken: string, exerciseId: string) {
+  return apiFetch<Exercise>(`/exercises/${exerciseId}`, {
     method: "DELETE",
     accessToken,
   });

@@ -1,0 +1,86 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(130, 10, 209, 0.2), transparent 30%),
+    var(--color-background);
+  color: var(--color-text);
+}
+
+.panel {
+  width: min(100%, 420px);
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: rgba(17, 16, 26, 0.88);
+  padding: 34px 28px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  text-align: center;
+}
+
+.orbit {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(192, 132, 252, 0.32);
+  border-radius: 999px;
+  position: relative;
+}
+
+.orbit::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid transparent;
+  border-top-color: var(--color-primary-soft);
+  animation: spin 900ms linear infinite;
+}
+
+.orbit span {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  box-shadow: 0 0 24px rgba(130, 10, 209, 0.72);
+}
+
+.copy {
+  display: grid;
+  gap: 8px;
+}
+
+.copy h1,
+.copy p {
+  margin: 0;
+}
+
+.copy h1 {
+  color: var(--color-text);
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.copy p:not(.eyebrow) {
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.eyebrow {
+  color: var(--color-primary-soft);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

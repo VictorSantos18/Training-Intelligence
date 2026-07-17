@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useAuthenticatedSession } from "@/features/auth/use-authenticated-session";
 import type { AuthenticatedSession } from "@/types";
 
@@ -23,9 +24,10 @@ export function ProtectedView({
 
   if (sessionState === "checking") {
     return (
-      <main className={styles.loadingPage}>
-        <p>Validando sessao...</p>
-      </main>
+      <LoadingState
+        title="Validando sessao"
+        message="Estamos conferindo seu acesso e preparando seu painel."
+      />
     );
   }
 

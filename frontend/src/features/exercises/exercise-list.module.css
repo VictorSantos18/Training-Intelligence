@@ -1,0 +1,133 @@
+.list {
+  display: grid;
+  gap: 14px;
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-elevated);
+  padding: 18px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cardHeader h4 {
+  margin: 10px 0 0;
+  color: var(--color-text);
+  font-size: 1.2rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badges span,
+.skillLabel {
+  border: 1px solid rgba(130, 10, 209, 0.36);
+  border-radius: 999px;
+  background: rgba(130, 10, 209, 0.16);
+  color: var(--color-primary-soft);
+  padding: 5px 9px;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.badges .active {
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(6, 95, 70, 0.18);
+  color: var(--color-success);
+}
+
+.badges .inactive {
+  border-color: rgba(148, 163, 184, 0.28);
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--color-muted);
+}
+
+.skillLabel {
+  max-width: 220px;
+  margin: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 16px;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.actions button {
+  min-height: 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0 14px;
+  font-weight: 800;
+}
+
+.actions button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-soft);
+}
+
+.actions .danger:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.empty,
+.emptyState {
+  margin: 0;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 24px;
+  color: var(--color-muted);
+}
+
+.emptyState {
+  display: grid;
+  gap: 8px;
+}
+
+.emptyState h4,
+.emptyState p {
+  margin: 0;
+}
+
+.emptyState h4 {
+  color: var(--color-text);
+}
+
+@media (max-width: 720px) {
+  .cardHeader,
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .skillLabel {
+    max-width: none;
+    text-align: left;
+  }
+}

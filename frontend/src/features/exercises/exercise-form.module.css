@@ -1,0 +1,83 @@
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.input,
+.select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  outline: none;
+  padding: 0 13px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.input::placeholder {
+  color: var(--color-muted);
+}
+
+.input:focus,
+.select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(130, 10, 209, 0.28);
+}
+
+.error {
+  color: var(--color-danger);
+  font-size: 0.78rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.primary,
+.secondary {
+  min-height: 44px;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0 16px;
+  font-weight: 800;
+}
+
+.primary {
+  border: 0;
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-primary-strong);
+}
+
+.primary:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.secondary {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+}
+
+.secondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-soft);
+}

@@ -10,7 +10,7 @@ import styles from "./skill-list.module.css";
 type SkillListProps = {
   isLoading: boolean;
   skills: Skill[];
-  onDelete: (skill: Skill) => Promise<void>;
+  onDelete: (skill: Skill) => void;
   onStatusChange: (skill: Skill, status: SkillStatus) => Promise<void>;
   onUpdate: (skillId: string, values: SkillFormValues) => Promise<void>;
 };
@@ -97,7 +97,7 @@ export function SkillList({
                   <button
                     className={styles.danger}
                     type="button"
-                    onClick={() => void onDelete(skill)}
+                    onClick={() => onDelete(skill)}
                   >
                     Excluir
                   </button>
