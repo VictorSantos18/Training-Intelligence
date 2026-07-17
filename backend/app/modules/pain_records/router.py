@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import CurrentUser, get_current_user
 from app.db.session import get_db_session
 from app.modules.pain_records.exceptions import (
+    PainRecordBodyRegionNotFoundError,
     PainRecordContextMismatchError,
     PainRecordNotFoundError,
     PainRecordTrainingSessionNotFoundError,
@@ -57,6 +58,11 @@ async def create_pain_record(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Training set not found",
         ) from exc
+    except PainRecordBodyRegionNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Body region not found",
+        ) from exc
     except PainRecordContextMismatchError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -106,6 +112,11 @@ async def update_pain_record(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="DURING_SET pain records require training_set_id",
+        ) from exc
+    except PainRecordBodyRegionNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Body region not found",
         ) from exc
 
 

@@ -26,8 +26,8 @@ class PainRecordCreate(BaseModel):
 
     training_session_id: UUID | None = None
     training_set_id: UUID | None = None
+    body_region_id: UUID
     occurred_at: datetime | None = None
-    body_region: str = Field(min_length=1, max_length=80)
     side: PainRecordSide
     moment: PainRecordMoment
     intensity: int = Field(ge=0, le=10)
@@ -47,14 +47,14 @@ class PainRecordUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
     occurred_at: datetime | None = None
-    body_region: str | None = Field(default=None, min_length=1, max_length=80)
+    body_region_id: UUID | None = None
     side: PainRecordSide | None = None
     moment: PainRecordMoment | None = None
     intensity: int | None = Field(default=None, ge=0, le=10)
     description: str | None = None
     notes: str | None = None
 
-    @field_validator("body_region", "side", "moment", "intensity", mode="before")
+    @field_validator("body_region_id", "side", "moment", "intensity", mode="before")
     @classmethod
     def disallow_null_for_required_if_present(cls, value: Any) -> Any:
         if value is None:
@@ -74,8 +74,8 @@ class PainRecordRead(BaseModel):
     id: str
     training_session_id: str | None
     training_set_id: str | None
+    body_region_id: str
     occurred_at: datetime
-    body_region: str
     side: PainRecordSide
     moment: PainRecordMoment
     intensity: int

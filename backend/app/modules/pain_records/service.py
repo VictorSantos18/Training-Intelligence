@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.pain_record import PainRecord
 from app.models.training_set import TrainingSet
+from app.modules.body_regions.repository import BodyRegionRepository
 from app.modules.pain_records.exceptions import (
+    PainRecordBodyRegionNotFoundError,
     PainRecordContextMismatchError,
     PainRecordNotFoundError,
     PainRecordTrainingSessionNotFoundError,
@@ -21,10 +23,12 @@ class PainRecordService:
     def __init__(
         self,
         pain_record_repository: PainRecordRepository | None = None,
+        body_region_repository: BodyRegionRepository | None = None,
         training_session_repository: TrainingSessionRepository | None = None,
         training_set_repository: TrainingSetRepository | None = None,
     ) -> None:
         self.pain_record_repository = pain_record_repository or PainRecordRepository()
+        self.body_region_repository = body_region_repository or BodyRegionRepository()
         self.training_session_repository = (
             training_session_repository or TrainingSessionRepository()
         )
@@ -51,6 +55,7 @@ class PainRecordService:
         data: PainRecordCreate,
     ) -> PainRecord:
         training_session_id = await self._resolve_training_session_id(session, user_id, data)
+        await self._ensure_body_region_exists(session, data.body_region_id)
         pain_record = await self.pain_record_repository.create(
             session,
             user_id,
@@ -84,6 +89,8 @@ class PainRecordService:
         data: PainRecordUpdate,
     ) -> PainRecord:
         pain_record = await self.get_pain_record(session, pain_record_id, user_id)
+        if data.body_region_id is not None:
+            await self._ensure_body_region_exists(session, data.body_region_id)
         if data.moment == PainRecordMoment.during_set and pain_record.training_set_id is None:
             raise PainRecordTrainingSetRequiredError
 
@@ -136,3 +143,15 @@ class PainRecordService:
                 raise PainRecordContextMismatchError
 
         return resolved_training_session_id
+
+    async def _ensure_body_region_exists(
+        self,
+        session: AsyncSession,
+        body_region_id: UUID,
+    ) -> None:
+        body_region = await self.body_region_repository.get_active_by_id(
+            session,
+            body_region_id,
+        )
+        if body_region is None:
+            raise PainRecordBodyRegionNotFoundError

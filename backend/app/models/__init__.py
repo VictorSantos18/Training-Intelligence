@@ -1,3 +1,4 @@
+from app.models.body_region import BodyRegion
 from app.models.exercise import Exercise
 from app.models.pain_record import PainRecord
 from app.models.profile import Profile
@@ -8,6 +9,7 @@ from app.models.training_set import TrainingSet
 
 __all__ = [
     "Exercise",
+    "BodyRegion",
     "PainRecord",
     "Profile",
     "SessionExercise",

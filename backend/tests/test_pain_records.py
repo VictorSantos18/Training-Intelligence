@@ -13,6 +13,7 @@ from app.modules.pain_records.router import pain_record_service
 USER_ID = "5f6a2fb7-2ebd-455d-a118-69d55d01c08d"
 TRAINING_SESSION_ID = "3f527bd7-5b7e-40d9-931f-ff176c6499df"
 TRAINING_SET_ID = "01ce428b-ae51-42ce-ad8f-b6e57ba73da2"
+BODY_REGION_ID = "278e2f4d-f2fb-43c4-9407-bcde83a06834"
 PAIN_RECORD_ID = "9b0da4fa-e5d6-4634-8046-3d8093f4754b"
 
 
@@ -23,8 +24,8 @@ def make_pain_record(**overrides: object) -> SimpleNamespace:
         "user_id": USER_ID,
         "training_session_id": TRAINING_SESSION_ID,
         "training_set_id": None,
+        "body_region_id": BODY_REGION_ID,
         "occurred_at": now,
-        "body_region": "left_shoulder",
         "side": "LEFT",
         "moment": "POST_SESSION",
         "intensity": 3,
@@ -65,7 +66,7 @@ def test_create_pain_record_rejects_user_id_from_body() -> None:
         json={
             "user_id": "b5a01308-78ea-477a-9205-5e010e5d37c7",
             "training_session_id": TRAINING_SESSION_ID,
-            "body_region": "left_shoulder",
+            "body_region_id": BODY_REGION_ID,
             "side": "LEFT",
             "moment": "POST_SESSION",
             "intensity": 3,
@@ -83,7 +84,7 @@ def test_create_pain_record_uses_current_user_id() -> None:
         "/pain-records",
         json={
             "training_session_id": TRAINING_SESSION_ID,
-            "body_region": "left_shoulder",
+            "body_region_id": BODY_REGION_ID,
             "side": "LEFT",
             "moment": "POST_SESSION",
             "intensity": 3,
@@ -92,10 +93,11 @@ def test_create_pain_record_uses_current_user_id() -> None:
     )
 
     assert response.status_code == 201
-    assert response.json()["body_region"] == "left_shoulder"
+    assert response.json()["body_region_id"] == BODY_REGION_ID
     _, user_id, payload = pain_record_service.create_pain_record.await_args.args
     assert user_id == USER_ID
     assert str(payload.training_session_id) == TRAINING_SESSION_ID
+    assert str(payload.body_region_id) == BODY_REGION_ID
 
 
 def test_create_pain_record_requires_training_context() -> None:
@@ -104,7 +106,7 @@ def test_create_pain_record_requires_training_context() -> None:
     response = client.post(
         "/pain-records",
         json={
-            "body_region": "left_shoulder",
+            "body_region_id": BODY_REGION_ID,
             "side": "LEFT",
             "moment": "POST_SESSION",
             "intensity": 3,
@@ -121,7 +123,7 @@ def test_create_pain_record_requires_training_set_for_during_set_moment() -> Non
         "/pain-records",
         json={
             "training_session_id": TRAINING_SESSION_ID,
-            "body_region": "left_shoulder",
+            "body_region_id": BODY_REGION_ID,
             "side": "LEFT",
             "moment": "DURING_SET",
             "intensity": 3,

@@ -49,7 +49,7 @@ class PainRecordRepository:
             "user_id": user_id,
             "training_session_id": training_session_id,
             "training_set_id": str(data.training_set_id) if data.training_set_id else None,
-            "body_region": data.body_region,
+            "body_region_id": str(data.body_region_id),
             "side": data.side.value,
             "moment": data.moment.value,
             "intensity": data.intensity,

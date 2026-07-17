@@ -10,6 +10,7 @@ def test_initial_domain_tables_are_registered() -> None:
         "training_sessions",
         "session_exercises",
         "training_sets",
+        "body_regions",
         "pain_records",
     }.issubset(Base.metadata.tables.keys())
 

@@ -45,12 +45,16 @@ class PainRecord(Base):
         UUID(as_uuid=False),
         ForeignKey("training_sets.id", ondelete="SET NULL"),
     )
+    body_region_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("body_regions.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
     occurred_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
     )
-    body_region: Mapped[str] = mapped_column(String(80), nullable=False)
     side: Mapped[str] = mapped_column(String(20), nullable=False)
     moment: Mapped[str] = mapped_column(String(20), nullable=False)
     intensity: Mapped[int] = mapped_column(SmallInteger, nullable=False)
@@ -71,3 +75,4 @@ class PainRecord(Base):
     user = relationship("Profile", back_populates="pain_records")
     training_session = relationship("TrainingSession", back_populates="pain_records")
     training_set = relationship("TrainingSet", back_populates="pain_records")
+    body_region = relationship("BodyRegion", back_populates="pain_records")

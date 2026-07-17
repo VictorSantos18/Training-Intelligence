@@ -16,3 +16,7 @@ class PainRecordContextMismatchError(Exception):
 
 class PainRecordTrainingSetRequiredError(Exception):
     pass
+
+
+class PainRecordBodyRegionNotFoundError(Exception):
+    pass
