@@ -1,0 +1,38 @@
+.loadingPage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--color-background);
+  color: var(--color-muted);
+}
+
+.errorPanel {
+  width: min(100%, 440px);
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  padding: 28px;
+}
+
+.errorPanel h1,
+.errorPanel p {
+  margin: 0;
+}
+
+.errorPanel h1 {
+  color: var(--color-text);
+  font-size: 1.45rem;
+}
+
+.errorPanel button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 800;
+}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { getSupabaseClient } from "@/lib/supabase";
@@ -15,6 +16,7 @@ type AppShellProps = {
 
 export function AppShell({ user, children }: AppShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   async function handleLogout() {
     await getSupabaseClient().auth.signOut();
@@ -30,10 +32,18 @@ export function AppShell({ user, children }: AppShellProps) {
         </div>
 
         <nav className={styles.nav} aria-label="Navegacao principal">
-          <a className={styles.navItemActive} href="/dashboard">
+          <Link
+            className={pathname === "/dashboard" ? styles.navItemActive : styles.navItem}
+            href="/dashboard"
+          >
             Dashboard
-          </a>
-          <span className={styles.navItemMuted}>Skills</span>
+          </Link>
+          <Link
+            className={pathname === "/skills" ? styles.navItemActive : styles.navItem}
+            href="/skills"
+          >
+            Skills
+          </Link>
           <span className={styles.navItemMuted}>Exercicios</span>
           <span className={styles.navItemMuted}>Sessoes</span>
         </nav>

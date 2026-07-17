@@ -1,4 +1,10 @@
-import type { ApiErrorPayload, CurrentUser } from "@/types";
+import type {
+  ApiErrorPayload,
+  CurrentUser,
+  Skill,
+  SkillCreatePayload,
+  SkillUpdatePayload,
+} from "@/types";
 
 export class ApiError extends Error {
   status: number;
@@ -51,4 +57,31 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
 export function getCurrentUser(accessToken: string) {
   return apiFetch<CurrentUser>("/me", { accessToken });
+}
+
+export function listSkills(accessToken: string) {
+  return apiFetch<Skill[]>("/skills", { accessToken });
+}
+
+export function createSkill(accessToken: string, payload: SkillCreatePayload) {
+  return apiFetch<Skill>("/skills", {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateSkill(accessToken: string, skillId: string, payload: SkillUpdatePayload) {
+  return apiFetch<Skill>(`/skills/${skillId}`, {
+    method: "PATCH",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteSkill(accessToken: string, skillId: string) {
+  return apiFetch<void>(`/skills/${skillId}`, {
+    method: "DELETE",
+    accessToken,
+  });
 }

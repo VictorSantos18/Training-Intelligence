@@ -16,3 +16,33 @@ export type ApiErrorPayload = {
 };
 
 export type AuthSessionState = "checking" | "authenticated" | "unauthenticated";
+
+export type AuthenticatedSession = {
+  user: CurrentUser;
+  accessToken: string;
+};
+
+export type SkillStatus = "ACTIVE" | "PAUSED" | "ACHIEVED";
+
+export type Skill = {
+  id: string;
+  name: string;
+  description: string | null;
+  status: SkillStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SkillFormValues = {
+  name: string;
+  description: string;
+  status: SkillStatus;
+};
+
+export type SkillCreatePayload = {
+  name: string;
+  description?: string | null;
+  status: SkillStatus;
+};
+
+export type SkillUpdatePayload = Partial<SkillCreatePayload>;
