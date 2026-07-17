@@ -77,6 +77,21 @@ function buildPainRecordPayload(sessionId: string, values: PainRecordFormValues)
   };
 }
 
+const painMomentLabels = {
+  PRE_SESSION: "Pre-sessao",
+  DURING_SET: "Durante o set",
+  POST_SESSION: "Pos-sessao",
+  CHECKIN_24H: "Check-in 24h",
+  CHECKIN_48H: "Check-in 48h",
+};
+
+const painSideLabels = {
+  LEFT: "Esquerdo",
+  RIGHT: "Direito",
+  BILATERAL: "Bilateral",
+  NOT_APPLICABLE: "Nao aplicavel",
+};
+
 export function SessionExecutionPanel({ accessToken, session }: SessionExecutionPanelProps) {
   const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
   const [bodyRegions, setBodyRegions] = useState<BodyRegion[]>([]);
@@ -152,6 +167,10 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
     return Object.values(setsBySessionExercise).flat();
   }, [setsBySessionExercise]);
 
+  const totalSuccessfulSets = useMemo(() => {
+    return allSets.filter((set) => set.result === "SUCCESS").length;
+  }, [allSets]);
+
   async function handleCreateSessionExercise(values: SessionExerciseFormValues) {
     setFeedback(null);
     setError(null);
@@ -216,8 +235,12 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
     <section className={styles.panel}>
       <header className={styles.header}>
         <div>
-          <h3>Treino em execucao</h3>
-          <p>Monte a sessao, registre sets e acompanhe desconfortos.</p>
+          <h3>{isSessionOpen ? "Treino em execucao" : "Resumo do treino"}</h3>
+          <p>
+            {isSessionOpen
+              ? "Monte a sessao, registre sets e acompanhe desconfortos."
+              : "Revise exercicios, sets registrados e sinais de dor desta sessao."}
+          </p>
         </div>
         <button type="button" onClick={loadExecution}>
           Atualizar
@@ -230,18 +253,41 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
       {isLoading ? (
         <p className={styles.empty}>Carregando dados do treino...</p>
       ) : (
-        <div className={styles.grid}>
+        <div className={isSessionOpen ? styles.grid : styles.historyGrid}>
           <div className={styles.column}>
-            <h4>Exercicios da sessao</h4>
+            {!isSessionOpen ? (
+              <section className={styles.historyStats} aria-label="Resumo do treino finalizado">
+                <article>
+                  <span>Exercicios</span>
+                  <strong>{sessionExercises.length}</strong>
+                </article>
+                <article>
+                  <span>Sets</span>
+                  <strong>{allSets.length}</strong>
+                </article>
+                <article>
+                  <span>Sucessos</span>
+                  <strong>{totalSuccessfulSets}</strong>
+                </article>
+                <article>
+                  <span>Dores</span>
+                  <strong>{painRecords.length}</strong>
+                </article>
+              </section>
+            ) : null}
+
+            <div className={styles.sectionHeader}>
+              <h4>Exercicios da sessao</h4>
+              {!isSessionOpen ? <span>Somente leitura</span> : null}
+            </div>
+
             {isSessionOpen ? (
               <ExecutionExerciseForm
                 exercises={selectableExercises}
                 nextOrder={sessionExercises.length + 1}
                 onSubmit={handleCreateSessionExercise}
               />
-            ) : (
-              <p className={styles.locked}>Sessao fechada. Edicao estrutural bloqueada.</p>
-            )}
+            ) : null}
 
             <ExecutionExerciseList
               exerciseNameById={exerciseNameById}
@@ -253,12 +299,17 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
           </div>
 
           <div className={styles.column}>
-            <h4>Dor e desconforto</h4>
-            <PainRecordForm
-              bodyRegions={bodyRegions}
-              sets={allSets}
-              onSubmit={handleCreatePainRecord}
-            />
+            <div className={styles.sectionHeader}>
+              <h4>Dor e desconforto</h4>
+              {!isSessionOpen ? <span>Historico</span> : null}
+            </div>
+            {isSessionOpen ? (
+              <PainRecordForm
+                bodyRegions={bodyRegions}
+                sets={allSets}
+                onSubmit={handleCreatePainRecord}
+              />
+            ) : null}
 
             <div className={styles.painList}>
               {painRecords.length === 0 ? (
@@ -268,8 +319,10 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
                   <article className={styles.painCard} key={record.id}>
                     <strong>{bodyRegionNameById[record.body_region_id] ?? "Regiao"}</strong>
                     <span>
-                      {record.moment} - intensidade {record.intensity}/10
+                      {painMomentLabels[record.moment]} - {painSideLabels[record.side]} -
+                      intensidade {record.intensity}/10
                     </span>
+                    {record.description ? <p>{record.description}</p> : null}
                     {record.notes ? <p>{record.notes}</p> : null}
                   </article>
                 ))

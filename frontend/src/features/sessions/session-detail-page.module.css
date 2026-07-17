@@ -80,7 +80,7 @@
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -104,6 +104,29 @@
   margin-top: 10px;
   color: var(--color-text);
   font-size: 1.35rem;
+}
+
+.notes {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(130, 10, 209, 0.36);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 8px;
+  background: rgba(130, 10, 209, 0.1);
+  padding: 18px;
+}
+
+.notes span {
+  color: var(--color-primary-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.notes p {
+  margin: 0;
+  color: var(--color-text);
+  line-height: 1.7;
 }
 
 .success,

@@ -126,6 +126,7 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
   const skillLabel = session.skill_id
     ? skillNameById[session.skill_id] ?? "Skill nao encontrada"
     : "Sessao geral";
+  const isSessionOpen = session.status === "IN_PROGRESS";
 
   return (
     <section className={styles.page}>
@@ -134,12 +135,14 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
           <Link className={styles.backLink} href="/sessions">
             Voltar para sessoes
           </Link>
-          <p className={styles.eyebrow}>Treino em execucao</p>
+          <p className={styles.eyebrow}>
+            {isSessionOpen ? "Treino em execucao" : "Historico do treino"}
+          </p>
           <h2>{skillLabel}</h2>
           <p>{new Date(session.started_at).toLocaleString("pt-BR")}</p>
         </div>
 
-        {session.status === "IN_PROGRESS" ? (
+        {isSessionOpen ? (
           <div className={styles.headerActions}>
             <button type="button" onClick={() => setSessionToFinish(session)}>
               Finalizar
@@ -167,7 +170,20 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
           <span>Sono</span>
           <strong>{session.sleep_hours ?? "-"}</strong>
         </article>
+        <article>
+          <span>Termino</span>
+          <strong>
+            {session.finished_at ? new Date(session.finished_at).toLocaleString("pt-BR") : "-"}
+          </strong>
+        </article>
       </section>
+
+      {session.notes_after ? (
+        <section className={styles.notes}>
+          <span>Notas finais</span>
+          <p>{session.notes_after}</p>
+        </section>
+      ) : null}
 
       <SessionExecutionPanel accessToken={accessToken} session={session} />
 
