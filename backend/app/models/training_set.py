@@ -80,3 +80,4 @@ class TrainingSet(Base):
     )
 
     session_exercise = relationship("SessionExercise", back_populates="training_sets")
+    pain_records = relationship("PainRecord", back_populates="training_set")

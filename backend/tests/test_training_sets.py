@@ -101,6 +101,19 @@ def test_create_training_set_uses_current_user_id() -> None:
     assert payload.result == "SUCCESS"
 
 
+def test_list_training_sets_uses_current_user_id() -> None:
+    client = make_client()
+    training_set_service.list_training_sets = AsyncMock(return_value=[make_training_set()])
+
+    response = client.get(f"/session-exercises/{SESSION_EXERCISE_ID}/sets")
+
+    assert response.status_code == 200
+    assert response.json()[0]["id"] == TRAINING_SET_ID
+    _, session_exercise_id, user_id = training_set_service.list_training_sets.await_args.args
+    assert str(session_exercise_id) == SESSION_EXERCISE_ID
+    assert user_id == USER_ID
+
+
 def test_create_training_set_requires_metric_when_not_skipped() -> None:
     client = make_client()
 

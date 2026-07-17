@@ -102,3 +102,4 @@ class TrainingSession(Base):
         back_populates="training_session",
         cascade="all, delete-orphan",
     )
+    pain_records = relationship("PainRecord", back_populates="training_session")

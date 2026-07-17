@@ -19,6 +19,28 @@ router = APIRouter(tags=["training-sets"])
 training_set_service = TrainingSetService()
 
 
+@router.get(
+    "/session-exercises/{session_exercise_id}/sets",
+    response_model=list[TrainingSetRead],
+)
+async def list_training_sets(
+    session_exercise_id: UUID,
+    current_user: Annotated[CurrentUser, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> list[TrainingSetRead]:
+    try:
+        return await training_set_service.list_training_sets(
+            session,
+            session_exercise_id,
+            current_user.id,
+        )
+    except TrainingSetSessionExerciseNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session exercise not found",
+        ) from exc
+
+
 @router.post(
     "/session-exercises/{session_exercise_id}/sets",
     response_model=TrainingSetRead,
@@ -110,4 +132,3 @@ async def delete_training_set(
         ) from exc
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-

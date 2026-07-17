@@ -5,6 +5,7 @@ from app.api.health import router as health_router
 from app.api.me import router as me_router
 from app.core.config import settings
 from app.modules.exercises.router import router as exercises_router
+from app.modules.pain_records.router import router as pain_records_router
 from app.modules.session_exercises.router import router as session_exercises_router
 from app.modules.sessions.router import router as sessions_router
 from app.modules.skills.router import router as skills_router
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
     app.include_router(sessions_router)
     app.include_router(session_exercises_router)
     app.include_router(training_sets_router)
+    app.include_router(pain_records_router)
     return app
 
 

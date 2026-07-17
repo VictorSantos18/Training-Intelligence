@@ -10,6 +10,18 @@ from app.modules.training_sets.schemas import TrainingSetCreate, TrainingSetUpda
 
 
 class TrainingSetRepository:
+    async def list_by_session_exercise(
+        self,
+        session: AsyncSession,
+        session_exercise_id: UUID,
+    ) -> list[TrainingSet]:
+        result = await session.execute(
+            select(TrainingSet)
+            .where(TrainingSet.session_exercise_id == str(session_exercise_id))
+            .order_by(TrainingSet.set_number.asc())
+        )
+        return list(result.scalars().all())
+
     async def get_by_id_and_user(
         self,
         session: AsyncSession,
@@ -70,4 +82,3 @@ class TrainingSetRepository:
     async def delete(self, session: AsyncSession, training_set: TrainingSet) -> None:
         await session.delete(training_set)
         await session.flush()
-

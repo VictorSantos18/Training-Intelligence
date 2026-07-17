@@ -31,6 +31,25 @@ class TrainingSetService:
             session_exercise_repository or SessionExerciseRepository()
         )
 
+    async def list_training_sets(
+        self,
+        session: AsyncSession,
+        session_exercise_id: UUID,
+        user_id: str,
+    ) -> list[TrainingSet]:
+        session_exercise = await self.session_exercise_repository.get_by_id_and_user(
+            session,
+            session_exercise_id,
+            user_id,
+        )
+        if session_exercise is None:
+            raise TrainingSetSessionExerciseNotFoundError
+
+        return await self.training_set_repository.list_by_session_exercise(
+            session,
+            session_exercise_id,
+        )
+
     async def create_training_set(
         self,
         session: AsyncSession,

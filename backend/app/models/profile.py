@@ -35,3 +35,4 @@ class Profile(Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    pain_records = relationship("PainRecord", back_populates="user", cascade="all, delete-orphan")
