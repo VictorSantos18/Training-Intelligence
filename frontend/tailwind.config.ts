@@ -5,9 +5,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#111827",
-        surface: "#f8fafc",
-        brand: "#f97316",
+        ink: "#f8fafc",
+        surface: "#07050a",
+        brand: "#820ad1",
       },
     },
   },
@@ -15,4 +15,3 @@ const config: Config = {
 };
 
 export default config;
-

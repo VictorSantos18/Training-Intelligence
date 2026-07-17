@@ -1,0 +1,9 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(130, 10, 209, 0.24), transparent 28%),
+    linear-gradient(135deg, #09070d 0%, #11101a 48%, #07050a 100%);
+}
