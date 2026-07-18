@@ -118,7 +118,7 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
       <section className={styles.empty}>
         <h2>Sessão não encontrada</h2>
         <p>{error ?? "Volte para a lista e escolha outra sessão."}</p>
-        <Link href="/sessions">Voltar para sessões</Link>
+        <Link href="/sessions">← Voltar para sessões</Link>
       </section>
     );
   }
@@ -133,6 +133,7 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
       <header className={styles.header}>
         <div>
           <Link className={styles.backLink} href="/sessions">
+            <span aria-hidden="true">←</span>
             Voltar para sessões
           </Link>
           <p className={styles.eyebrow}>

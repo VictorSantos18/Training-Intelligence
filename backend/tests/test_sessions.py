@@ -9,7 +9,13 @@ from fastapi.testclient import TestClient
 from app.core.auth import CurrentUser, get_current_user
 from app.db.session import get_db_session
 from app.main import create_app
+from app.modules.sessions.exceptions import (
+    TrainingSessionClosedError,
+    TrainingSessionInvalidFinishError,
+)
 from app.modules.sessions.router import training_session_service
+from app.modules.sessions.schemas import TrainingSessionFinish, TrainingSessionUpdate
+from app.modules.sessions.service import TrainingSessionService
 
 USER_ID = "5f6a2fb7-2ebd-455d-a118-69d55d01c08d"
 SESSION_ID = "37d23d66-b1f2-4f41-bb03-4f90728451cd"
@@ -52,6 +58,10 @@ def make_client() -> TestClient:
     app.dependency_overrides[get_current_user] = override_current_user
     app.dependency_overrides[get_db_session] = override_db_session
     return TestClient(app)
+
+
+def make_db_session() -> SimpleNamespace:
+    return SimpleNamespace(commit=AsyncMock(), refresh=AsyncMock())
 
 
 def test_create_session_rejects_user_id_from_body() -> None:
@@ -176,3 +186,96 @@ def test_cancel_session_uses_current_user_id() -> None:
     _, session_id, user_id = training_session_service.cancel_training_session.await_args.args
     assert str(session_id) == SESSION_ID
     assert user_id == USER_ID
+
+
+async def test_update_training_session_rejects_closed_session() -> None:
+    training_session_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=make_training_session(status="COMPLETED")),
+        update=AsyncMock(),
+    )
+    service = TrainingSessionService(
+        training_session_repository=training_session_repository,
+        profile_repository=SimpleNamespace(),
+        skill_repository=SimpleNamespace(),
+    )
+    payload = TrainingSessionUpdate(energy_before=8)
+
+    try:
+        await service.update_training_session(make_db_session(), SESSION_ID, USER_ID, payload)
+    except TrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    training_session_repository.update.assert_not_called()
+
+
+async def test_finish_training_session_rejects_closed_session() -> None:
+    training_session_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=make_training_session(status="CANCELLED")),
+        finish=AsyncMock(),
+    )
+    service = TrainingSessionService(
+        training_session_repository=training_session_repository,
+        profile_repository=SimpleNamespace(),
+        skill_repository=SimpleNamespace(),
+    )
+    payload = TrainingSessionFinish(notes_after="late finish")
+
+    try:
+        await service.finish_training_session(make_db_session(), SESSION_ID, USER_ID, payload)
+    except TrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    training_session_repository.finish.assert_not_called()
+
+
+async def test_cancel_training_session_rejects_closed_session() -> None:
+    training_session_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=make_training_session(status="COMPLETED")),
+        cancel=AsyncMock(),
+    )
+    service = TrainingSessionService(
+        training_session_repository=training_session_repository,
+        profile_repository=SimpleNamespace(),
+        skill_repository=SimpleNamespace(),
+    )
+
+    try:
+        await service.cancel_training_session(make_db_session(), SESSION_ID, USER_ID)
+    except TrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    training_session_repository.cancel.assert_not_called()
+
+
+async def test_finish_training_session_rejects_finished_at_before_started_at() -> None:
+    started_at = datetime(2026, 7, 16, 18, 0, tzinfo=UTC)
+    training_session_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(
+            return_value=make_training_session(started_at=started_at),
+        ),
+        finish=AsyncMock(),
+    )
+    service = TrainingSessionService(
+        training_session_repository=training_session_repository,
+        profile_repository=SimpleNamespace(),
+        skill_repository=SimpleNamespace(),
+    )
+    payload = TrainingSessionFinish(
+        finished_at=datetime(2026, 7, 16, 17, 59, tzinfo=UTC),
+        notes_after="invalid finish",
+    )
+
+    try:
+        await service.finish_training_session(make_db_session(), SESSION_ID, USER_ID, payload)
+    except TrainingSessionInvalidFinishError:
+        pass
+    else:
+        raise AssertionError("Expected invalid finish to be rejected")
+
+    training_session_repository.finish.assert_not_called()

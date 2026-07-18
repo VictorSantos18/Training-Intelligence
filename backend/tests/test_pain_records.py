@@ -8,7 +8,10 @@ from fastapi.testclient import TestClient
 from app.core.auth import CurrentUser, get_current_user
 from app.db.session import get_db_session
 from app.main import create_app
+from app.modules.pain_records.exceptions import PainRecordTrainingSessionClosedError
 from app.modules.pain_records.router import pain_record_service
+from app.modules.pain_records.schemas import PainRecordCreate, PainRecordUpdate
+from app.modules.pain_records.service import PainRecordService
 
 USER_ID = "5f6a2fb7-2ebd-455d-a118-69d55d01c08d"
 TRAINING_SESSION_ID = "3f527bd7-5b7e-40d9-931f-ff176c6499df"
@@ -56,6 +59,10 @@ def make_client() -> TestClient:
     app.dependency_overrides[get_current_user] = override_current_user
     app.dependency_overrides[get_db_session] = override_db_session
     return TestClient(app)
+
+
+def make_db_session() -> SimpleNamespace:
+    return SimpleNamespace(commit=AsyncMock(), refresh=AsyncMock(), rollback=AsyncMock())
 
 
 def test_create_pain_record_rejects_user_id_from_body() -> None:
@@ -187,3 +194,138 @@ def test_delete_pain_record_uses_current_user_id() -> None:
     _, pain_record_id, user_id = pain_record_service.delete_pain_record.await_args.args
     assert str(pain_record_id) == PAIN_RECORD_ID
     assert user_id == USER_ID
+
+
+def test_create_pain_record_returns_409_for_closed_training_session() -> None:
+    client = make_client()
+    pain_record_service.create_pain_record = AsyncMock(
+        side_effect=PainRecordTrainingSessionClosedError
+    )
+
+    response = client.post(
+        "/pain-records",
+        json={
+            "training_session_id": TRAINING_SESSION_ID,
+            "body_region_id": BODY_REGION_ID,
+            "side": "LEFT",
+            "moment": "POST_SESSION",
+            "intensity": 3,
+        },
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Training session is already closed"
+
+
+def test_update_pain_record_returns_409_for_closed_training_session() -> None:
+    client = make_client()
+    pain_record_service.update_pain_record = AsyncMock(
+        side_effect=PainRecordTrainingSessionClosedError
+    )
+
+    response = client.patch(f"/pain-records/{PAIN_RECORD_ID}", json={"intensity": 4})
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Training session is already closed"
+
+
+def test_delete_pain_record_returns_409_for_closed_training_session() -> None:
+    client = make_client()
+    pain_record_service.delete_pain_record = AsyncMock(
+        side_effect=PainRecordTrainingSessionClosedError
+    )
+
+    response = client.delete(f"/pain-records/{PAIN_RECORD_ID}")
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Training session is already closed"
+
+
+async def test_create_pain_record_rejects_closed_training_session() -> None:
+    training_session_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(
+            return_value=SimpleNamespace(id=TRAINING_SESSION_ID, status="COMPLETED"),
+        ),
+    )
+    body_region_repository = SimpleNamespace(get_active_by_id=AsyncMock())
+    pain_record_repository = SimpleNamespace(create=AsyncMock())
+    service = PainRecordService(
+        pain_record_repository=pain_record_repository,
+        body_region_repository=body_region_repository,
+        training_session_repository=training_session_repository,
+        training_set_repository=SimpleNamespace(),
+    )
+    payload = PainRecordCreate(
+        training_session_id=TRAINING_SESSION_ID,
+        body_region_id=BODY_REGION_ID,
+        side="LEFT",
+        moment="POST_SESSION",
+        intensity=3,
+    )
+
+    try:
+        await service.create_pain_record(make_db_session(), USER_ID, payload)
+    except PainRecordTrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    body_region_repository.get_active_by_id.assert_not_called()
+    pain_record_repository.create.assert_not_called()
+
+
+async def test_update_pain_record_rejects_closed_training_session() -> None:
+    training_session_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(
+            return_value=SimpleNamespace(id=TRAINING_SESSION_ID, status="CANCELLED"),
+        ),
+    )
+    body_region_repository = SimpleNamespace(get_active_by_id=AsyncMock())
+    pain_record_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=make_pain_record()),
+        update=AsyncMock(),
+    )
+    service = PainRecordService(
+        pain_record_repository=pain_record_repository,
+        body_region_repository=body_region_repository,
+        training_session_repository=training_session_repository,
+        training_set_repository=SimpleNamespace(),
+    )
+    payload = PainRecordUpdate(intensity=4)
+
+    try:
+        await service.update_pain_record(make_db_session(), PAIN_RECORD_ID, USER_ID, payload)
+    except PainRecordTrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    body_region_repository.get_active_by_id.assert_not_called()
+    pain_record_repository.update.assert_not_called()
+
+
+async def test_delete_pain_record_rejects_closed_training_session() -> None:
+    training_session_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(
+            return_value=SimpleNamespace(id=TRAINING_SESSION_ID, status="COMPLETED"),
+        ),
+    )
+    pain_record_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=make_pain_record()),
+        delete=AsyncMock(),
+    )
+    service = PainRecordService(
+        pain_record_repository=pain_record_repository,
+        body_region_repository=SimpleNamespace(),
+        training_session_repository=training_session_repository,
+        training_set_repository=SimpleNamespace(),
+    )
+
+    try:
+        await service.delete_pain_record(make_db_session(), PAIN_RECORD_ID, USER_ID)
+    except PainRecordTrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    pain_record_repository.delete.assert_not_called()

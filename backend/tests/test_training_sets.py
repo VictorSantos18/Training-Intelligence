@@ -9,7 +9,10 @@ from fastapi.testclient import TestClient
 from app.core.auth import CurrentUser, get_current_user
 from app.db.session import get_db_session
 from app.main import create_app
+from app.modules.training_sets.exceptions import TrainingSetSessionClosedError
 from app.modules.training_sets.router import training_set_service
+from app.modules.training_sets.schemas import TrainingSetCreate, TrainingSetUpdate
+from app.modules.training_sets.service import TrainingSetService
 
 USER_ID = "5f6a2fb7-2ebd-455d-a118-69d55d01c08d"
 SESSION_EXERCISE_ID = "9be5475f-ae30-4213-8e42-83056a50ea53"
@@ -56,6 +59,10 @@ def make_client() -> TestClient:
     app.dependency_overrides[get_current_user] = override_current_user
     app.dependency_overrides[get_db_session] = override_db_session
     return TestClient(app)
+
+
+def make_db_session() -> SimpleNamespace:
+    return SimpleNamespace(commit=AsyncMock(), refresh=AsyncMock(), rollback=AsyncMock())
 
 
 def test_create_training_set_rejects_user_id_from_body() -> None:
@@ -153,3 +160,90 @@ def test_delete_training_set_uses_current_user_id() -> None:
     _, training_set_id, user_id = training_set_service.delete_training_set.await_args.args
     assert str(training_set_id) == TRAINING_SET_ID
     assert user_id == USER_ID
+
+
+async def test_create_training_set_rejects_closed_training_session() -> None:
+    session_exercise = SimpleNamespace(
+        training_session=SimpleNamespace(status="COMPLETED"),
+    )
+    session_exercise_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=session_exercise),
+    )
+    training_set_repository = SimpleNamespace(create=AsyncMock())
+    service = TrainingSetService(
+        training_set_repository=training_set_repository,
+        session_exercise_repository=session_exercise_repository,
+    )
+    payload = TrainingSetCreate(
+        set_number=1,
+        duration_seconds=Decimal("8.50"),
+        result="SUCCESS",
+    )
+
+    try:
+        await service.create_training_set(
+            make_db_session(),
+            SESSION_EXERCISE_ID,
+            USER_ID,
+            payload,
+        )
+    except TrainingSetSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    training_set_repository.create.assert_not_called()
+
+
+async def test_update_training_set_rejects_closed_training_session() -> None:
+    training_set = make_training_set()
+    training_set.session_exercise = SimpleNamespace(
+        training_session=SimpleNamespace(status="CANCELLED"),
+    )
+    training_set_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=training_set),
+        update=AsyncMock(),
+    )
+    service = TrainingSetService(
+        training_set_repository=training_set_repository,
+        session_exercise_repository=SimpleNamespace(),
+    )
+    payload = TrainingSetUpdate(rpe=Decimal("9.0"))
+
+    try:
+        await service.update_training_set(
+            make_db_session(),
+            TRAINING_SET_ID,
+            USER_ID,
+            payload,
+        )
+    except TrainingSetSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    training_set_repository.update.assert_not_called()
+
+
+async def test_delete_training_set_rejects_closed_training_session() -> None:
+    training_set = make_training_set()
+    training_set.session_exercise = SimpleNamespace(
+        training_session=SimpleNamespace(status="COMPLETED"),
+    )
+    training_set_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=training_set),
+        delete=AsyncMock(),
+    )
+    service = TrainingSetService(
+        training_set_repository=training_set_repository,
+        session_exercise_repository=SimpleNamespace(),
+    )
+
+    try:
+        await service.delete_training_set(make_db_session(), TRAINING_SET_ID, USER_ID)
+    except TrainingSetSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    training_set_repository.delete.assert_not_called()

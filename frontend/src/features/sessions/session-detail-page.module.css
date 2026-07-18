@@ -29,7 +29,9 @@
 }
 
 .backLink {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--color-muted);
   margin-bottom: 16px;
   text-decoration: none;

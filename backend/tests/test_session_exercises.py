@@ -8,9 +8,12 @@ from fastapi.testclient import TestClient
 from app.core.auth import CurrentUser, get_current_user
 from app.db.session import get_db_session
 from app.main import create_app
-from app.modules.session_exercises.exceptions import SessionExerciseSkillMismatchError
+from app.modules.session_exercises.exceptions import (
+    SessionExerciseSkillMismatchError,
+    SessionExerciseTrainingSessionClosedError,
+)
 from app.modules.session_exercises.router import session_exercise_service
-from app.modules.session_exercises.schemas import SessionExerciseCreate
+from app.modules.session_exercises.schemas import SessionExerciseCreate, SessionExerciseUpdate
 from app.modules.session_exercises.service import SessionExerciseService
 
 USER_ID = "5f6a2fb7-2ebd-455d-a118-69d55d01c08d"
@@ -53,6 +56,10 @@ def make_client() -> TestClient:
     app.dependency_overrides[get_current_user] = override_current_user
     app.dependency_overrides[get_db_session] = override_db_session
     return TestClient(app)
+
+
+def make_db_session() -> SimpleNamespace:
+    return SimpleNamespace(commit=AsyncMock(), refresh=AsyncMock(), rollback=AsyncMock())
 
 
 def test_create_session_exercise_rejects_user_id_from_body() -> None:
@@ -193,3 +200,86 @@ async def test_create_session_exercise_rejects_exercise_from_other_skill() -> No
         raise AssertionError("Expected skill mismatch to be rejected")
 
     session_exercise_repository.create.assert_not_called()
+
+
+async def test_create_session_exercise_rejects_closed_training_session() -> None:
+    training_session_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(
+            return_value=SimpleNamespace(status="COMPLETED", skill_id=SKILL_ID),
+        ),
+    )
+    exercise_repository = SimpleNamespace(get_by_id_and_user=AsyncMock())
+    session_exercise_repository = SimpleNamespace(create=AsyncMock())
+    service = SessionExerciseService(
+        session_exercise_repository=session_exercise_repository,
+        training_session_repository=training_session_repository,
+        exercise_repository=exercise_repository,
+    )
+
+    payload = SessionExerciseCreate(
+        exercise_id=EXERCISE_ID,
+        execution_order=1,
+    )
+
+    try:
+        await service.create_session_exercise(make_db_session(), SESSION_ID, USER_ID, payload)
+    except SessionExerciseTrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    exercise_repository.get_by_id_and_user.assert_not_called()
+    session_exercise_repository.create.assert_not_called()
+
+
+async def test_update_session_exercise_rejects_closed_training_session() -> None:
+    session_exercise = make_session_exercise()
+    session_exercise.training_session = SimpleNamespace(status="CANCELLED")
+    session_exercise_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=session_exercise),
+        update=AsyncMock(),
+    )
+    service = SessionExerciseService(
+        session_exercise_repository=session_exercise_repository,
+        training_session_repository=SimpleNamespace(),
+        exercise_repository=SimpleNamespace(),
+    )
+
+    payload = SessionExerciseUpdate(notes="Do not update")
+
+    try:
+        await service.update_session_exercise(
+            make_db_session(),
+            SESSION_EXERCISE_ID,
+            USER_ID,
+            payload,
+        )
+    except SessionExerciseTrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    session_exercise_repository.update.assert_not_called()
+
+
+async def test_delete_session_exercise_rejects_closed_training_session() -> None:
+    session_exercise = make_session_exercise()
+    session_exercise.training_session = SimpleNamespace(status="COMPLETED")
+    session_exercise_repository = SimpleNamespace(
+        get_by_id_and_user=AsyncMock(return_value=session_exercise),
+        delete=AsyncMock(),
+    )
+    service = SessionExerciseService(
+        session_exercise_repository=session_exercise_repository,
+        training_session_repository=SimpleNamespace(),
+        exercise_repository=SimpleNamespace(),
+    )
+
+    try:
+        await service.delete_session_exercise(make_db_session(), SESSION_EXERCISE_ID, USER_ID)
+    except SessionExerciseTrainingSessionClosedError:
+        pass
+    else:
+        raise AssertionError("Expected closed session to be rejected")
+
+    session_exercise_repository.delete.assert_not_called()

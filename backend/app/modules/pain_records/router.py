@@ -10,6 +10,7 @@ from app.modules.pain_records.exceptions import (
     PainRecordBodyRegionNotFoundError,
     PainRecordContextMismatchError,
     PainRecordNotFoundError,
+    PainRecordTrainingSessionClosedError,
     PainRecordTrainingSessionNotFoundError,
     PainRecordTrainingSetNotFoundError,
     PainRecordTrainingSetRequiredError,
@@ -62,6 +63,11 @@ async def create_pain_record(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Body region not found",
+        ) from exc
+    except PainRecordTrainingSessionClosedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Training session is already closed",
         ) from exc
     except PainRecordContextMismatchError as exc:
         raise HTTPException(
@@ -118,6 +124,11 @@ async def update_pain_record(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Body region not found",
         ) from exc
+    except PainRecordTrainingSessionClosedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Training session is already closed",
+        ) from exc
 
 
 @router.delete("/pain-records/{pain_record_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -132,6 +143,11 @@ async def delete_pain_record(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Pain record not found",
+        ) from exc
+    except PainRecordTrainingSessionClosedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Training session is already closed",
         ) from exc
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

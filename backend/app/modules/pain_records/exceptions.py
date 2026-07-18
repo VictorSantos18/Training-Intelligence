@@ -6,6 +6,10 @@ class PainRecordTrainingSessionNotFoundError(Exception):
     pass
 
 
+class PainRecordTrainingSessionClosedError(Exception):
+    pass
+
+
 class PainRecordTrainingSetNotFoundError(Exception):
     pass
 

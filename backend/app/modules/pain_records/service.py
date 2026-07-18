@@ -9,6 +9,7 @@ from app.modules.pain_records.exceptions import (
     PainRecordBodyRegionNotFoundError,
     PainRecordContextMismatchError,
     PainRecordNotFoundError,
+    PainRecordTrainingSessionClosedError,
     PainRecordTrainingSessionNotFoundError,
     PainRecordTrainingSetNotFoundError,
     PainRecordTrainingSetRequiredError,
@@ -16,6 +17,7 @@ from app.modules.pain_records.exceptions import (
 from app.modules.pain_records.repository import PainRecordRepository
 from app.modules.pain_records.schemas import PainRecordCreate, PainRecordMoment, PainRecordUpdate
 from app.modules.sessions.repository import TrainingSessionRepository
+from app.modules.sessions.schemas import TrainingSessionStatus
 from app.modules.training_sets.repository import TrainingSetRepository
 
 
@@ -55,6 +57,7 @@ class PainRecordService:
         data: PainRecordCreate,
     ) -> PainRecord:
         training_session_id = await self._resolve_training_session_id(session, user_id, data)
+        await self._ensure_training_session_open(session, training_session_id, user_id)
         await self._ensure_body_region_exists(session, data.body_region_id)
         pain_record = await self.pain_record_repository.create(
             session,
@@ -89,6 +92,11 @@ class PainRecordService:
         data: PainRecordUpdate,
     ) -> PainRecord:
         pain_record = await self.get_pain_record(session, pain_record_id, user_id)
+        await self._ensure_training_session_open(
+            session,
+            pain_record.training_session_id,
+            user_id,
+        )
         if data.body_region_id is not None:
             await self._ensure_body_region_exists(session, data.body_region_id)
         if data.moment == PainRecordMoment.during_set and pain_record.training_set_id is None:
@@ -106,6 +114,11 @@ class PainRecordService:
         user_id: str,
     ) -> None:
         pain_record = await self.get_pain_record(session, pain_record_id, user_id)
+        await self._ensure_training_session_open(
+            session,
+            pain_record.training_session_id,
+            user_id,
+        )
         await self.pain_record_repository.delete(session, pain_record)
         await session.commit()
 
@@ -155,3 +168,22 @@ class PainRecordService:
         )
         if body_region is None:
             raise PainRecordBodyRegionNotFoundError
+
+    async def _ensure_training_session_open(
+        self,
+        session: AsyncSession,
+        training_session_id: str | UUID | None,
+        user_id: str,
+    ) -> None:
+        if training_session_id is None:
+            raise PainRecordTrainingSessionNotFoundError
+
+        training_session = await self.training_session_repository.get_by_id_and_user(
+            session,
+            training_session_id,
+            user_id,
+        )
+        if training_session is None:
+            raise PainRecordTrainingSessionNotFoundError
+        if training_session.status != TrainingSessionStatus.in_progress.value:
+            raise PainRecordTrainingSessionClosedError
