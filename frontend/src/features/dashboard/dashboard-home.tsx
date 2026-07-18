@@ -19,6 +19,8 @@ const sessionStatusLabels: Record<TrainingSessionStatus, string> = {
   CANCELLED: "Cancelada",
 };
 
+const RECENT_SESSIONS_LIMIT = 3;
+
 function formatMetric(value: number | null, suffix = "") {
   if (value === null) {
     return "-";
@@ -87,6 +89,10 @@ function DashboardContent({ accessToken }: DashboardContentProps) {
 
   const maxPainRecords = useMemo(() => {
     return getMaxValue(overview?.pain_by_region.map((item) => item.record_count) ?? []);
+  }, [overview]);
+
+  const recentSessions = useMemo(() => {
+    return overview?.recent_sessions.slice(0, RECENT_SESSIONS_LIMIT) ?? [];
   }, [overview]);
 
   return (
@@ -169,11 +175,11 @@ function DashboardContent({ accessToken }: DashboardContentProps) {
                 <p>Acesso rápido ao histórico recente.</p>
               </div>
 
-              {overview.recent_sessions.length === 0 ? (
+              {recentSessions.length === 0 ? (
                 <EmptyList message="Crie uma sessão para ela aparecer aqui." />
               ) : (
                 <div className={styles.sessionList}>
-                  {overview.recent_sessions.map((session) => (
+                  {recentSessions.map((session) => (
                     <Link
                       className={styles.sessionItem}
                       href={`/sessions/${session.id}`}

@@ -149,7 +149,7 @@ class AnalyticsRepository:
             .outerjoin(Skill, TrainingSession.skill_id == Skill.id)
             .where(TrainingSession.user_id == user_id)
             .order_by(TrainingSession.started_at.desc())
-            .limit(5)
+            .limit(3)
         )
 
         return [
