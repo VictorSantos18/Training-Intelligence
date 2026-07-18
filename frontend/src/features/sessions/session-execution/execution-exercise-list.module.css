@@ -14,8 +14,9 @@
 
 .header {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   gap: 12px;
+  align-items: start;
 }
 
 .header span {
@@ -50,6 +51,8 @@
 }
 
 .setCard {
+  display: grid;
+  gap: 8px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 9px;
@@ -75,6 +78,42 @@
   padding-left: 10px;
 }
 
+.actions,
+.inlineActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.inlineActions {
+  justify-content: flex-start;
+}
+
+.actions button,
+.inlineActions button {
+  min-height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.actions button:hover,
+.inlineActions button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-soft);
+}
+
+.actions .danger:hover,
+.inlineActions .danger:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
 .empty,
 .emptyInline {
   margin: 0;
@@ -85,6 +124,15 @@
 }
 
 @media (max-width: 760px) {
+  .header {
+    grid-template-columns: auto 1fr;
+  }
+
+  .actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
   .setRow {
     grid-template-columns: 1fr 1fr;
   }

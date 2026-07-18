@@ -2,21 +2,30 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   createPainRecord,
   createSessionExercise,
   createTrainingSet,
+  deletePainRecord,
+  deleteSessionExercise,
+  deleteTrainingSet,
   listBodyRegions,
   listExercises,
   listPainRecords,
   listSessionExercises,
   listTrainingSets,
+  updatePainRecord,
+  updateSessionExercise,
+  updateTrainingSet,
 } from "@/lib/api";
 import type {
   BodyRegion,
   Exercise,
   PainRecord,
+  PainRecordCreatePayload,
   PainRecordFormValues,
+  PainRecordUpdatePayload,
   SessionExercise,
   SessionExerciseFormValues,
   TrainingSession,
@@ -33,6 +42,11 @@ type SessionExecutionPanelProps = {
   accessToken: string;
   session: TrainingSession;
 };
+
+type DeleteTarget =
+  | { type: "sessionExercise"; sessionExercise: SessionExercise }
+  | { type: "trainingSet"; sessionExerciseId: string; set: TrainingSet }
+  | { type: "painRecord"; painRecord: PainRecord };
 
 function emptyToNull(value: string) {
   const trimmedValue = value.trim();
@@ -64,7 +78,10 @@ function buildTrainingSetPayload(values: TrainingSetFormValues) {
   };
 }
 
-function buildPainRecordPayload(sessionId: string, values: PainRecordFormValues) {
+function buildPainRecordCreatePayload(
+  sessionId: string,
+  values: PainRecordFormValues,
+): PainRecordCreatePayload {
   return {
     training_session_id: sessionId,
     training_set_id: values.training_set_id || null,
@@ -74,6 +91,29 @@ function buildPainRecordPayload(sessionId: string, values: PainRecordFormValues)
     intensity: Number(values.intensity),
     description: emptyToNull(values.description),
     notes: emptyToNull(values.notes),
+  };
+}
+
+function buildPainRecordUpdatePayload(values: PainRecordFormValues): PainRecordUpdatePayload {
+  return {
+    body_region_id: values.body_region_id,
+    side: values.side,
+    moment: values.moment,
+    intensity: Number(values.intensity),
+    description: emptyToNull(values.description),
+    notes: emptyToNull(values.notes),
+  };
+}
+
+function getPainRecordFormValues(record: PainRecord): PainRecordFormValues {
+  return {
+    training_set_id: record.training_set_id ?? "",
+    body_region_id: record.body_region_id,
+    side: record.side,
+    moment: record.moment,
+    intensity: String(record.intensity),
+    description: record.description ?? "",
+    notes: record.notes ?? "",
   };
 }
 
@@ -92,6 +132,36 @@ const painSideLabels = {
   NOT_APPLICABLE: "Não aplicável",
 };
 
+function getDeleteTitle(deleteTarget: DeleteTarget | null) {
+  if (deleteTarget?.type === "sessionExercise") {
+    return "Remover exercício da sessão";
+  }
+  if (deleteTarget?.type === "trainingSet") {
+    return "Excluir set";
+  }
+  return "Excluir registro de dor";
+}
+
+function getDeleteDescription(deleteTarget: DeleteTarget | null) {
+  if (deleteTarget?.type === "sessionExercise") {
+    return "O exercício será removido desta sessão e os sets vinculados também serão excluídos.";
+  }
+  if (deleteTarget?.type === "trainingSet") {
+    return "O set será excluído. Registros de dor vinculados a ele permanecerão na sessão sem set específico.";
+  }
+  return "O registro de dor será removido do treino.";
+}
+
+function getDeleteConfirmLabel(deleteTarget: DeleteTarget | null) {
+  if (deleteTarget?.type === "sessionExercise") {
+    return "Remover exercício";
+  }
+  if (deleteTarget?.type === "trainingSet") {
+    return "Excluir set";
+  }
+  return "Excluir dor";
+}
+
 export function SessionExecutionPanel({ accessToken, session }: SessionExecutionPanelProps) {
   const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
   const [bodyRegions, setBodyRegions] = useState<BodyRegion[]>([]);
@@ -100,6 +170,9 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
     {},
   );
   const [painRecords, setPainRecords] = useState<PainRecord[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [editingPainRecordId, setEditingPainRecordId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -134,6 +207,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
       setSessionExercises(sessionExercisesData);
       setPainRecords(painRecordsData);
       setSetsBySessionExercise(Object.fromEntries(setPairs));
+      setEditingPainRecordId(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível carregar o treino.");
     } finally {
@@ -192,6 +266,33 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
     }
   }
 
+  async function handleUpdateSessionExercise(
+    sessionExerciseId: string,
+    values: SessionExerciseFormValues,
+  ) {
+    setFeedback(null);
+    setError(null);
+
+    try {
+      const updatedSessionExercise = await updateSessionExercise(accessToken, sessionExerciseId, {
+        execution_order: Number(values.execution_order),
+        notes: emptyToNull(values.notes),
+      });
+      setSessionExercises((current) =>
+        current
+          .map((sessionExercise) =>
+            sessionExercise.id === updatedSessionExercise.id
+              ? updatedSessionExercise
+              : sessionExercise,
+          )
+          .sort((a, b) => a.execution_order - b.execution_order),
+      );
+      setFeedback("Exercício atualizado.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível atualizar exercício.");
+    }
+  }
+
   async function handleCreateTrainingSet(
     sessionExerciseId: string,
     values: TrainingSetFormValues,
@@ -215,6 +316,28 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
     }
   }
 
+  async function handleUpdateTrainingSet(
+    sessionExerciseId: string,
+    setId: string,
+    values: TrainingSetFormValues,
+  ) {
+    setFeedback(null);
+    setError(null);
+
+    try {
+      const updatedSet = await updateTrainingSet(accessToken, setId, buildTrainingSetPayload(values));
+      setSetsBySessionExercise((current) => ({
+        ...current,
+        [sessionExerciseId]: (current[sessionExerciseId] ?? [])
+          .map((set) => (set.id === updatedSet.id ? updatedSet : set))
+          .sort((a, b) => a.set_number - b.set_number),
+      }));
+      setFeedback("Set atualizado.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível atualizar o set.");
+    }
+  }
+
   async function handleCreatePainRecord(values: PainRecordFormValues) {
     setFeedback(null);
     setError(null);
@@ -222,12 +345,100 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
     try {
       const createdPainRecord = await createPainRecord(
         accessToken,
-        buildPainRecordPayload(session.id, values),
+        buildPainRecordCreatePayload(session.id, values),
       );
       setPainRecords((current) => [createdPainRecord, ...current]);
       setFeedback("Dor registrada.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível registrar dor.");
+    }
+  }
+
+  async function handleUpdatePainRecord(painRecordId: string, values: PainRecordFormValues) {
+    setFeedback(null);
+    setError(null);
+
+    try {
+      const updatedPainRecord = await updatePainRecord(
+        accessToken,
+        painRecordId,
+        buildPainRecordUpdatePayload(values),
+      );
+      setPainRecords((current) =>
+        current.map((record) => (record.id === updatedPainRecord.id ? updatedPainRecord : record)),
+      );
+      setEditingPainRecordId(null);
+      setFeedback("Registro de dor atualizado.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível atualizar dor.");
+    }
+  }
+
+  async function confirmDeleteTarget() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    setFeedback(null);
+    setError(null);
+    setIsDeleting(true);
+
+    try {
+      if (deleteTarget.type === "sessionExercise") {
+        const deletedSetIds = new Set(
+          (setsBySessionExercise[deleteTarget.sessionExercise.id] ?? []).map((set) => set.id),
+        );
+
+        await deleteSessionExercise(accessToken, deleteTarget.sessionExercise.id);
+        setSessionExercises((current) =>
+          current.filter((item) => item.id !== deleteTarget.sessionExercise.id),
+        );
+        setSetsBySessionExercise((current) => {
+          const next = { ...current };
+          delete next[deleteTarget.sessionExercise.id];
+          return next;
+        });
+        setPainRecords((current) =>
+          current.map((record) =>
+            record.training_set_id && deletedSetIds.has(record.training_set_id)
+              ? { ...record, training_set_id: null }
+              : record,
+          ),
+        );
+        setFeedback("Exercício removido da sessão.");
+      }
+
+      if (deleteTarget.type === "trainingSet") {
+        await deleteTrainingSet(accessToken, deleteTarget.set.id);
+        setSetsBySessionExercise((current) => ({
+          ...current,
+          [deleteTarget.sessionExerciseId]: (current[deleteTarget.sessionExerciseId] ?? []).filter(
+            (set) => set.id !== deleteTarget.set.id,
+          ),
+        }));
+        setPainRecords((current) =>
+          current.map((record) =>
+            record.training_set_id === deleteTarget.set.id
+              ? { ...record, training_set_id: null }
+              : record,
+          ),
+        );
+        setFeedback("Set excluído.");
+      }
+
+      if (deleteTarget.type === "painRecord") {
+        await deletePainRecord(accessToken, deleteTarget.painRecord.id);
+        setPainRecords((current) =>
+          current.filter((record) => record.id !== deleteTarget.painRecord.id),
+        );
+        setFeedback("Registro de dor excluído.");
+      }
+
+      setDeleteTarget(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível excluir o registro.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -295,6 +506,14 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
               sessionExercises={sessionExercises}
               setsBySessionExercise={setsBySessionExercise}
               onCreateSet={handleCreateTrainingSet}
+              onDeleteSessionExercise={(sessionExercise) =>
+                setDeleteTarget({ type: "sessionExercise", sessionExercise })
+              }
+              onDeleteSet={(sessionExerciseId, set) =>
+                setDeleteTarget({ type: "trainingSet", sessionExerciseId, set })
+              }
+              onUpdateSessionExercise={handleUpdateSessionExercise}
+              onUpdateSet={handleUpdateTrainingSet}
             />
           </div>
 
@@ -315,22 +534,70 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
               {painRecords.length === 0 ? (
                 <p className={styles.empty}>Nenhum registro de dor nesta sessão.</p>
               ) : (
-                painRecords.map((record) => (
-                  <article className={styles.painCard} key={record.id}>
-                    <strong>{bodyRegionNameById[record.body_region_id] ?? "Região"}</strong>
-                    <span>
-                      {painMomentLabels[record.moment]} - {painSideLabels[record.side]} -
-                      intensidade {record.intensity}/10
-                    </span>
-                    {record.description ? <p>{record.description}</p> : null}
-                    {record.notes ? <p>{record.notes}</p> : null}
-                  </article>
-                ))
+                painRecords.map((record) => {
+                  const isEditingPainRecord = editingPainRecordId === record.id;
+
+                  return (
+                    <article className={styles.painCard} key={record.id}>
+                      <strong>{bodyRegionNameById[record.body_region_id] ?? "Região"}</strong>
+                      <span>
+                        {painMomentLabels[record.moment]} - {painSideLabels[record.side]} -
+                        intensidade {record.intensity}/10
+                      </span>
+                      {record.description ? <p>{record.description}</p> : null}
+                      {record.notes ? <p>{record.notes}</p> : null}
+
+                      {isSessionOpen ? (
+                        <div className={styles.painActions}>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditingPainRecordId(isEditingPainRecord ? null : record.id)
+                            }
+                          >
+                            {isEditingPainRecord ? "Fechar edição" : "Editar dor"}
+                          </button>
+                          <button
+                            className={styles.danger}
+                            type="button"
+                            onClick={() => setDeleteTarget({ type: "painRecord", painRecord: record })}
+                          >
+                            Excluir dor
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {isEditingPainRecord ? (
+                        <PainRecordForm
+                          bodyRegions={bodyRegions}
+                          canChooseSet={false}
+                          initialValues={getPainRecordFormValues(record)}
+                          resetOnSubmit={false}
+                          sets={allSets}
+                          submitLabel="Salvar dor"
+                          submittingLabel="Salvando..."
+                          onSubmit={(values) => handleUpdatePainRecord(record.id, values)}
+                        />
+                      ) : null}
+                    </article>
+                  );
+                })
               )}
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        confirmLabel={getDeleteConfirmLabel(deleteTarget)}
+        description={getDeleteDescription(deleteTarget)}
+        isOpen={deleteTarget !== null}
+        isProcessing={isDeleting}
+        title={getDeleteTitle(deleteTarget)}
+        tone="danger"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void confirmDeleteTarget()}
+      />
     </section>
   );
 }

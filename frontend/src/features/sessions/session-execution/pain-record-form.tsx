@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -25,11 +26,39 @@ const painSchema = z
 
 type PainRecordFormProps = {
   bodyRegions: BodyRegion[];
+  canChooseSet?: boolean;
+  initialValues?: PainRecordFormValues;
+  resetOnSubmit?: boolean;
   sets: TrainingSet[];
+  submitLabel?: string;
+  submittingLabel?: string;
   onSubmit: (values: PainRecordFormValues) => Promise<void>;
 };
 
-export function PainRecordForm({ bodyRegions, sets, onSubmit }: PainRecordFormProps) {
+const emptyValues: PainRecordFormValues = {
+  training_set_id: "",
+  body_region_id: "",
+  side: "NOT_APPLICABLE",
+  moment: "POST_SESSION",
+  intensity: "",
+  description: "",
+  notes: "",
+};
+
+function getDefaultValues(initialValues?: PainRecordFormValues) {
+  return initialValues ?? emptyValues;
+}
+
+export function PainRecordForm({
+  bodyRegions,
+  canChooseSet = true,
+  initialValues,
+  resetOnSubmit = true,
+  sets,
+  submitLabel = "Registrar dor",
+  submittingLabel = "Registrando...",
+  onSubmit,
+}: PainRecordFormProps) {
   const {
     register,
     handleSubmit,
@@ -37,28 +66,19 @@ export function PainRecordForm({ bodyRegions, sets, onSubmit }: PainRecordFormPr
     formState: { errors, isSubmitting },
   } = useForm<PainRecordFormValues>({
     resolver: zodResolver(painSchema),
-    defaultValues: {
-      training_set_id: "",
-      body_region_id: "",
-      side: "NOT_APPLICABLE",
-      moment: "POST_SESSION",
-      intensity: "",
-      description: "",
-      notes: "",
-    },
+    defaultValues: getDefaultValues(initialValues),
   });
+  const disabledSetValue = initialValues?.training_set_id ?? "";
+
+  useEffect(() => {
+    reset(getDefaultValues(initialValues));
+  }, [initialValues, reset]);
 
   async function submit(values: PainRecordFormValues) {
     await onSubmit(values);
-    reset({
-      training_set_id: "",
-      body_region_id: "",
-      side: "NOT_APPLICABLE",
-      moment: "POST_SESSION",
-      intensity: "",
-      description: "",
-      notes: "",
-    });
+    if (resetOnSubmit) {
+      reset(emptyValues);
+    }
   }
 
   return (
@@ -76,14 +96,28 @@ export function PainRecordForm({ bodyRegions, sets, onSubmit }: PainRecordFormPr
 
       <label>
         <span>Set</span>
-        <select {...register("training_set_id")}>
-          <option value="">Sem set especifico</option>
-          {sets.map((set) => (
-            <option key={set.id} value={set.id}>
-              Set {set.set_number}
-            </option>
-          ))}
-        </select>
+        {canChooseSet ? (
+          <select {...register("training_set_id")}>
+            <option value="">Sem set específico</option>
+            {sets.map((set) => (
+              <option key={set.id} value={set.id}>
+                Set {set.set_number}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <>
+            <input type="hidden" {...register("training_set_id")} />
+            <select disabled value={disabledSetValue} onChange={() => undefined}>
+              <option value="">Sem set específico</option>
+              {sets.map((set) => (
+                <option key={set.id} value={set.id}>
+                  Set {set.set_number}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
         {errors.training_set_id ? <small>{errors.training_set_id.message}</small> : null}
       </label>
 
@@ -118,7 +152,11 @@ export function PainRecordForm({ bodyRegions, sets, onSubmit }: PainRecordFormPr
 
       <label>
         <span>Descrição</span>
-        <input placeholder="Ex: pontada, tensão, desconforto..." type="text" {...register("description")} />
+        <input
+          placeholder="Ex: pontada, tensão, desconforto..."
+          type="text"
+          {...register("description")}
+        />
       </label>
 
       <label>
@@ -127,7 +165,7 @@ export function PainRecordForm({ bodyRegions, sets, onSubmit }: PainRecordFormPr
       </label>
 
       <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Registrando..." : "Registrar dor"}
+        {isSubmitting ? submittingLabel : submitLabel}
       </button>
     </form>
   );

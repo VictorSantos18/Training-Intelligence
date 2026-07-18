@@ -140,6 +140,11 @@ export type SessionExerciseCreatePayload = {
   notes?: string | null;
 };
 
+export type SessionExerciseUpdatePayload = {
+  execution_order?: number;
+  notes?: string | null;
+};
+
 export type TrainingSetResult = "SUCCESS" | "PARTIAL" | "FAILED" | "SKIPPED";
 
 export type TechnicalQuality = "EXCELLENT" | "GOOD" | "ACCEPTABLE" | "POOR";
@@ -186,6 +191,8 @@ export type TrainingSetCreatePayload = {
   rest_seconds?: number | null;
   notes?: string | null;
 };
+
+export type TrainingSetUpdatePayload = Partial<TrainingSetCreatePayload>;
 
 export type BodyRegion = {
   id: string;
@@ -237,6 +244,15 @@ export type PainRecordCreatePayload = {
   side: PainRecordSide;
   moment: PainRecordMoment;
   intensity: number;
+  description?: string | null;
+  notes?: string | null;
+};
+
+export type PainRecordUpdatePayload = {
+  body_region_id?: string;
+  side?: PainRecordSide;
+  moment?: PainRecordMoment;
+  intensity?: number;
   description?: string | null;
   notes?: string | null;
 };

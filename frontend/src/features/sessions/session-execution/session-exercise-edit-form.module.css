@@ -1,0 +1,57 @@
+.form {
+  display: grid;
+  grid-template-columns: 90px minmax(180px, 1fr) auto auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.field input,
+.form button {
+  min-height: 38px;
+  border-radius: 8px;
+}
+
+.field input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 0 10px;
+}
+
+.field small {
+  color: var(--color-danger);
+}
+
+.primary,
+.secondary {
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  padding: 0 12px;
+  font-weight: 800;
+}
+
+.primary {
+  border-color: transparent;
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.secondary {
+  background: transparent;
+  color: var(--color-text);
+}
+
+@media (max-width: 760px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+}

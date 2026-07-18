@@ -8,13 +8,16 @@ import type {
   ExerciseUpdatePayload,
   PainRecord,
   PainRecordCreatePayload,
+  PainRecordUpdatePayload,
   SessionExercise,
   SessionExerciseCreatePayload,
+  SessionExerciseUpdatePayload,
   Skill,
   SkillCreatePayload,
   SkillUpdatePayload,
   TrainingSet,
   TrainingSetCreatePayload,
+  TrainingSetUpdatePayload,
   TrainingSession,
   TrainingSessionCreatePayload,
   TrainingSessionFinishPayload,
@@ -216,6 +219,25 @@ export function createSessionExercise(
   });
 }
 
+export function updateSessionExercise(
+  accessToken: string,
+  sessionExerciseId: string,
+  payload: SessionExerciseUpdatePayload,
+) {
+  return apiFetch<SessionExercise>(`/session-exercises/${sessionExerciseId}`, {
+    method: "PATCH",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteSessionExercise(accessToken: string, sessionExerciseId: string) {
+  return apiFetch<void>(`/session-exercises/${sessionExerciseId}`, {
+    method: "DELETE",
+    accessToken,
+  });
+}
+
 export function listTrainingSets(accessToken: string, sessionExerciseId: string) {
   return apiFetch<TrainingSet[]>(`/session-exercises/${sessionExerciseId}/sets`, {
     accessToken,
@@ -231,6 +253,25 @@ export function createTrainingSet(
     method: "POST",
     accessToken,
     body: JSON.stringify(payload),
+  });
+}
+
+export function updateTrainingSet(
+  accessToken: string,
+  setId: string,
+  payload: TrainingSetUpdatePayload,
+) {
+  return apiFetch<TrainingSet>(`/sets/${setId}`, {
+    method: "PATCH",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteTrainingSet(accessToken: string, setId: string) {
+  return apiFetch<void>(`/sets/${setId}`, {
+    method: "DELETE",
+    accessToken,
   });
 }
 
@@ -261,5 +302,24 @@ export function createPainRecord(accessToken: string, payload: PainRecordCreateP
     method: "POST",
     accessToken,
     body: JSON.stringify(payload),
+  });
+}
+
+export function updatePainRecord(
+  accessToken: string,
+  painRecordId: string,
+  payload: PainRecordUpdatePayload,
+) {
+  return apiFetch<PainRecord>(`/pain-records/${painRecordId}`, {
+    method: "PATCH",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deletePainRecord(accessToken: string, painRecordId: string) {
+  return apiFetch<void>(`/pain-records/${painRecordId}`, {
+    method: "DELETE",
+    accessToken,
   });
 }

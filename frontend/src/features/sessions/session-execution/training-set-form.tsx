@@ -32,11 +32,37 @@ const setSchema = z
   );
 
 type TrainingSetFormProps = {
+  initialValues?: TrainingSetFormValues;
   nextSetNumber: number;
+  resetOnSubmit?: boolean;
+  submitLabel?: string;
+  submittingLabel?: string;
   onSubmit: (values: TrainingSetFormValues) => Promise<void>;
 };
 
-export function TrainingSetForm({ nextSetNumber, onSubmit }: TrainingSetFormProps) {
+function getDefaultValues(nextSetNumber: number, initialValues?: TrainingSetFormValues) {
+  return {
+    set_number: initialValues?.set_number ?? String(nextSetNumber),
+    repetitions: initialValues?.repetitions ?? "",
+    duration_seconds: initialValues?.duration_seconds ?? "",
+    assistance_level: initialValues?.assistance_level ?? "",
+    rpe: initialValues?.rpe ?? "",
+    pain_during: initialValues?.pain_during ?? "",
+    result: initialValues?.result ?? "SUCCESS",
+    technical_quality: initialValues?.technical_quality ?? "",
+    rest_seconds: initialValues?.rest_seconds ?? "",
+    notes: initialValues?.notes ?? "",
+  };
+}
+
+export function TrainingSetForm({
+  initialValues,
+  nextSetNumber,
+  resetOnSubmit = true,
+  submitLabel = "Registrar set",
+  submittingLabel = "Salvando...",
+  onSubmit,
+}: TrainingSetFormProps) {
   const {
     register,
     handleSubmit,
@@ -44,44 +70,30 @@ export function TrainingSetForm({ nextSetNumber, onSubmit }: TrainingSetFormProp
     formState: { errors, isSubmitting },
   } = useForm<TrainingSetFormValues>({
     resolver: zodResolver(setSchema),
-    defaultValues: {
-      set_number: String(nextSetNumber),
-      repetitions: "",
-      duration_seconds: "",
-      assistance_level: "",
-      rpe: "",
-      pain_during: "",
-      result: "SUCCESS",
-      technical_quality: "",
-      rest_seconds: "",
-      notes: "",
-    },
+    defaultValues: getDefaultValues(nextSetNumber, initialValues),
   });
 
   useEffect(() => {
-    reset((values) => ({ ...values, set_number: String(nextSetNumber) }));
-  }, [nextSetNumber, reset]);
+    reset(getDefaultValues(nextSetNumber, initialValues));
+  }, [initialValues, nextSetNumber, reset]);
 
   async function submit(values: TrainingSetFormValues) {
     await onSubmit(values);
-    reset({
-      set_number: String(nextSetNumber + 1),
-      repetitions: "",
-      duration_seconds: "",
-      assistance_level: "",
-      rpe: "",
-      pain_during: "",
-      result: "SUCCESS",
-      technical_quality: "",
-      rest_seconds: "",
-      notes: "",
-    });
+    if (resetOnSubmit) {
+      reset(getDefaultValues(nextSetNumber + 1));
+    }
   }
 
   return (
     <form className={styles.form} onSubmit={handleSubmit(submit)}>
-      <input aria-label="Numero do set" min="1" type="number" {...register("set_number")} />
-      <input aria-label="Repetições" min="0" placeholder="Reps" type="number" {...register("repetitions")} />
+      <input aria-label="Número do set" min="1" type="number" {...register("set_number")} />
+      <input
+        aria-label="Repetições"
+        min="0"
+        placeholder="Reps"
+        type="number"
+        {...register("repetitions")}
+      />
       <input
         aria-label="Duração em segundos"
         min="0"
@@ -90,7 +102,15 @@ export function TrainingSetForm({ nextSetNumber, onSubmit }: TrainingSetFormProp
         type="number"
         {...register("duration_seconds")}
       />
-      <input aria-label="RPE" max="10" min="0" placeholder="RPE" step="0.1" type="number" {...register("rpe")} />
+      <input
+        aria-label="RPE"
+        max="10"
+        min="0"
+        placeholder="RPE"
+        step="0.1"
+        type="number"
+        {...register("rpe")}
+      />
       <input
         aria-label="Dor durante"
         max="10"
@@ -105,11 +125,11 @@ export function TrainingSetForm({ nextSetNumber, onSubmit }: TrainingSetFormProp
         <option value="FAILED">Falha</option>
         <option value="SKIPPED">Pulada</option>
       </select>
-      <select aria-label="Qualidade tecnica" {...register("technical_quality")}>
+      <select aria-label="Qualidade técnica" {...register("technical_quality")}>
         <option value="">Qualidade</option>
         <option value="EXCELLENT">Excelente</option>
         <option value="GOOD">Boa</option>
-        <option value="ACCEPTABLE">Aceitavel</option>
+        <option value="ACCEPTABLE">Aceitável</option>
         <option value="POOR">Ruim</option>
       </select>
       <input
@@ -122,7 +142,7 @@ export function TrainingSetForm({ nextSetNumber, onSubmit }: TrainingSetFormProp
       <input aria-label="Notas do set" placeholder="Notas" type="text" {...register("notes")} />
       {errors.duration_seconds ? <small>{errors.duration_seconds.message}</small> : null}
       <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Salvando..." : "Registrar set"}
+        {isSubmitting ? submittingLabel : submitLabel}
       </button>
     </form>
   );
