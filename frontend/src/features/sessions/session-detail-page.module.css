@@ -191,7 +191,4 @@
     grid-template-columns: 1fr;
   }
 
-  .headerActions {
-    flex-direction: column;
-  }
 }

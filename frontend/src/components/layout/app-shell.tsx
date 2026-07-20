@@ -26,7 +26,7 @@ export function AppShell({ user, children }: AppShellProps) {
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
-        <div>
+        <div className={styles.brandBlock}>
           <p className={styles.brandEyebrow}>Training</p>
           <h1 className={styles.brand}>Intelligence</h1>
         </div>

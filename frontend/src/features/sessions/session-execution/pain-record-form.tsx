@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -15,7 +15,13 @@ const painSchema = z
     body_region_id: z.string().min(1, "Escolha a região."),
     side: z.enum(["LEFT", "RIGHT", "BILATERAL", "NOT_APPLICABLE"]),
     moment: z.enum(["PRE_SESSION", "DURING_SET", "POST_SESSION", "CHECKIN_24H", "CHECKIN_48H"]),
-    intensity: z.string().min(1, "Informe a intensidade."),
+    intensity: z
+      .string()
+      .min(1, "Informe a intensidade.")
+      .refine((value) => {
+        const intensity = Number(value);
+        return Number.isFinite(intensity) && intensity >= 0 && intensity <= 10;
+      }, "Informe uma intensidade entre 0 e 10."),
     description: z.string().optional().default(""),
     notes: z.string().optional().default(""),
   })
@@ -40,7 +46,7 @@ const emptyValues: PainRecordFormValues = {
   body_region_id: "",
   side: "NOT_APPLICABLE",
   moment: "POST_SESSION",
-  intensity: "",
+  intensity: "0",
   description: "",
   notes: "",
 };
@@ -63,12 +69,15 @@ export function PainRecordForm({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PainRecordFormValues>({
     resolver: zodResolver(painSchema),
     defaultValues: getDefaultValues(initialValues),
   });
   const disabledSetValue = initialValues?.training_set_id ?? "";
+  const intensityValue = watch("intensity") || "0";
+  const intensityProgress = `${Number(intensityValue) * 10}%`;
 
   useEffect(() => {
     reset(getDefaultValues(initialValues));
@@ -145,8 +154,19 @@ export function PainRecordForm({
       </label>
 
       <label>
-        <span>Intensidade</span>
-        <input max="10" min="0" type="number" {...register("intensity")} />
+        <span className={styles.sliderHeader}>
+          <span>Intensidade</span>
+          <strong>{intensityValue}/10</strong>
+        </span>
+        <input
+          className={styles.slider}
+          max="10"
+          min="0"
+          step="1"
+          style={{ "--slider-progress": intensityProgress } as CSSProperties}
+          type="range"
+          {...register("intensity")}
+        />
         {errors.intensity ? <small>{errors.intensity.message}</small> : null}
       </label>
 

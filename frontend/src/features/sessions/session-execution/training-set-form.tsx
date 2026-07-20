@@ -139,7 +139,13 @@ export function TrainingSetForm({
         type="number"
         {...register("rest_seconds")}
       />
-      <input aria-label="Notas do set" placeholder="Notas" type="text" {...register("notes")} />
+      <input
+        aria-label="Notas do set"
+        className={styles.notesInput}
+        placeholder="Notas"
+        type="text"
+        {...register("notes")}
+      />
       {errors.duration_seconds ? <small>{errors.duration_seconds.message}</small> : null}
       <button type="submit" disabled={isSubmitting}>
         {isSubmitting ? submittingLabel : submitLabel}
