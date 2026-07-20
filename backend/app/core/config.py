@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyHttpUrl, Field, field_validator, model_validator
+from pydantic import AliasChoices, AnyHttpUrl, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT_ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     environment: Literal["development", "test", "production"]
     database_url: str
     frontend_url: AnyHttpUrl
+    cors_origins_env: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("CORS_ORIGINS", "cors_origins"),
+    )
     backend_cors_origins: str | None = None
 
     database_ssl_mode: Literal["auto", "disable", "require"] = "auto"
@@ -46,14 +50,14 @@ class Settings(BaseSettings):
             )
         return value
 
-    @field_validator("backend_cors_origins")
+    @field_validator("cors_origins_env", "backend_cors_origins")
     @classmethod
     def validate_cors_wildcard(cls, value: str | None) -> str | None:
         if value is None:
             return value
         origins = [origin.strip() for origin in value.split(",") if origin.strip()]
         if "*" in origins:
-            raise ValueError("BACKEND_CORS_ORIGINS cannot contain '*'")
+            raise ValueError("CORS origins cannot contain '*'")
         return value
 
     @model_validator(mode="after")
@@ -78,13 +82,14 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         origins = [str(self.frontend_url).rstrip("/")]
+        if self.cors_origins_env:
+            origins.extend(self._parse_cors_origins(self.cors_origins_env))
         if self.backend_cors_origins:
-            origins.extend(
-                origin.strip().rstrip("/")
-                for origin in self.backend_cors_origins.split(",")
-                if origin.strip()
-            )
+            origins.extend(self._parse_cors_origins(self.backend_cors_origins))
         return list(dict.fromkeys(origins))
+
+    def _parse_cors_origins(self, value: str) -> list[str]:
+        return [origin.strip().rstrip("/") for origin in value.split(",") if origin.strip()]
 
 
 @lru_cache

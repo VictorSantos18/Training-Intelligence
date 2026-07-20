@@ -16,7 +16,7 @@ def make_settings(**overrides: object) -> Settings:
         "supabase_jwt_audience": None,
     }
     values.update(overrides)
-    return Settings(**values)
+    return Settings(_env_file=None, **values)
 
 
 def test_environment_accepts_only_supported_values() -> None:
@@ -36,7 +36,7 @@ def test_production_requires_supabase_auth_settings() -> None:
 
 def test_cors_origins_combines_frontend_and_extra_origins() -> None:
     settings = make_settings(
-        backend_cors_origins="http://localhost:3000, https://app.vercel.app/",
+        cors_origins="http://localhost:3000, https://app.vercel.app/",
     )
 
     assert settings.cors_origins == [
@@ -47,7 +47,19 @@ def test_cors_origins_combines_frontend_and_extra_origins() -> None:
 
 def test_cors_origins_rejects_wildcard() -> None:
     with pytest.raises(ValidationError):
-        make_settings(backend_cors_origins="*")
+        make_settings(cors_origins="*")
+
+
+def test_cors_origins_keeps_backend_cors_origins_compatibility() -> None:
+    settings = make_settings(
+        backend_cors_origins="http://127.0.0.1:3000, https://app.vercel.app/",
+    )
+
+    assert settings.cors_origins == [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://app.vercel.app",
+    ]
 
 
 def test_database_url_is_converted_to_asyncpg_with_ssl() -> None:

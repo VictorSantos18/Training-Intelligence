@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
 from app.api.me import router as me_router
-from app.core.config import settings
+from app.core.config import Settings, settings
 from app.modules.analytics.router import router as analytics_router
 from app.modules.body_regions.router import router as body_regions_router
 from app.modules.exercises.router import router as exercises_router
@@ -14,7 +14,7 @@ from app.modules.skills.router import router as skills_router
 from app.modules.training_sets.router import router as training_sets_router
 
 
-def create_app() -> FastAPI:
+def create_app(app_settings: Settings = settings) -> FastAPI:
     app = FastAPI(
         title="Training Intelligence API",
         version="0.1.0",
@@ -22,7 +22,7 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=app_settings.cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

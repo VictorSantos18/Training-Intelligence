@@ -125,6 +125,6 @@ Ordem recomendada:
 
 1. Configurar Supabase.
 2. Executar migrations no banco de produção.
-3. Publicar backend.
+3. Publicar backend e configurar a lista de origens permitidas para CORS no Render.
 4. Publicar frontend.
 5. Validar login, criação de sessão, registro de sets, registro de dor, finalização de sessão e dashboard.
