@@ -11,6 +11,7 @@ class Skill(Base):
     __table_args__ = (
         CheckConstraint("status IN ('ACTIVE','PAUSED','ACHIEVED')", name="skills_status_check"),
         UniqueConstraint("user_id", "name", name="skills_user_name_unique"),
+        sa.Index("idx_skills_user_id", "user_id"),
     )
 
     id: Mapped[str] = mapped_column(

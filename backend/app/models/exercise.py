@@ -26,6 +26,7 @@ class Exercise(Base):
             name="exercises_measurement_type_check",
         ),
         UniqueConstraint("user_id", "name", name="exercises_user_name_unique"),
+        sa.Index("idx_exercises_user_skill", "user_id", "skill_id"),
     )
 
     id: Mapped[str] = mapped_column(

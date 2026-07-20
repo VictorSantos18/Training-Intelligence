@@ -30,6 +30,8 @@ class TrainingSession(Base):
             "finished_at IS NULL OR finished_at > started_at",
             name="training_sessions_finished_after_started_check",
         ),
+        sa.Index("idx_sessions_user_started", "user_id", "started_at"),
+        sa.Index("idx_sessions_user_skill_started", "user_id", "skill_id", "started_at"),
     )
 
     id: Mapped[str] = mapped_column(

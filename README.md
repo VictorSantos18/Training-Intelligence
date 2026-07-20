@@ -1,73 +1,54 @@
 # Training Intelligence System
 
-Aplicacao web pessoal para registrar, organizar e analisar treinos de calistenia, com foco inicial em Front Lever e Iron Cross.
+Aplicação web pessoal para registrar, organizar e analisar treinos de calistenia, com foco nas skills do usuário.
 
-Esta primeira entrega cria a fundacao do projeto:
-
-- Monorepo com `frontend/`, `backend/`, `database/` e `docs/`.
-- PostgreSQL local via Docker Compose.
-- Backend FastAPI minimo com `GET /health`.
-- SQLAlchemy 2, Alembic e Pytest configurados.
-- Frontend Next.js com TypeScript e Tailwind CSS.
-- `.env` na raiz como fonte local de configuracao.
+O objetivo do projeto é centralizar o histórico de treinos, exercícios, séries, percepção de esforço, qualidade técnica e registros de dor em uma interface simples para uso no dia a dia.
 
 ## Estrutura
 
 ```txt
-training-intelligence/
-+-- frontend/
-+-- backend/
-+-- database/
-+-- docs/
-+-- docker-compose.yml
-+-- .env
-+-- README.md
+daily/
+├── backend/
+├── frontend/
+├── database/
+├── docs/
+├── docker-compose.yml
+└── README.md
 ```
 
-## Requisitos locais
+- `backend/`: API FastAPI com SQLAlchemy, Alembic e Pytest.
+- `frontend/`: aplicação Next.js com React e TypeScript.
+- `database/`: documentação auxiliar de banco.
+- `docs/`: documentação complementar do projeto.
+
+## Requisitos
 
 - Docker Desktop
 - Python 3.12+
 - Node.js 20+
 - pnpm ou npm
 
-## Banco local
+## Rodar Banco Local
 
 ```bash
 docker compose up -d postgres
 ```
 
-Conexao padrao:
-
-```txt
-postgresql://training:training@localhost:5433/training_intelligence
-```
-
-## Configuracao
-
-O backend le as variaveis diretamente do arquivo `.env` na raiz do projeto. Valores obrigatorios para a fundacao atual:
-
-```env
-ENVIRONMENT=development
-DATABASE_URL=postgresql+asyncpg://training:training@localhost:5433/training_intelligence
-FRONTEND_URL=http://localhost:3000
-```
-
-## Backend
+## Rodar Backend
 
 ```bash
 cd backend
 python -m venv .venv
 .venv\Scripts\activate
-pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
 alembic upgrade head
-uvicorn app.main:app --reload --port 8000
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
-Consultar a migration atual:
+Se o Windows bloquear o executável do Uvicorn, use o formato com módulo Python:
 
 ```bash
-alembic current
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
 Health check:
@@ -76,7 +57,7 @@ Health check:
 curl http://localhost:8000/health
 ```
 
-## Frontend
+## Rodar Frontend
 
 ```bash
 cd frontend
@@ -84,15 +65,66 @@ pnpm install
 pnpm dev
 ```
 
-Aplicacao:
+A aplicação local roda em:
 
 ```txt
 http://localhost:3000
 ```
 
-## Proximos passos
+## Migrations
 
-1. Criar autenticacao Supabase e dependencia `get_current_user` no FastAPI.
-2. Implementar CRUD de skills e exercises com testes de isolamento por usuario.
-3. Implementar sessoes, exercicios da sessao e series em transacao.
-4. Implementar registros de dor e dashboard inicial.
+Consultar migration atual:
+
+```bash
+cd backend
+alembic current
+```
+
+Aplicar migrations:
+
+```bash
+cd backend
+alembic upgrade head
+```
+
+Verificar se os models e migrations estão alinhados:
+
+```bash
+cd backend
+alembic check
+```
+
+## Validação
+
+Backend:
+
+```bash
+cd backend
+python -m ruff check
+python -m pytest
+```
+
+Frontend:
+
+```bash
+cd frontend
+pnpm lint
+pnpm typecheck
+pnpm build
+```
+
+## Deploy
+
+Stack prevista para o MVP:
+
+- Frontend na Vercel.
+- Backend no Render.
+- Banco e autenticação no Supabase.
+
+Ordem recomendada:
+
+1. Configurar Supabase.
+2. Executar migrations no banco de produção.
+3. Publicar backend.
+4. Publicar frontend.
+5. Validar login, criação de sessão, registro de sets, registro de dor, finalização de sessão e dashboard.

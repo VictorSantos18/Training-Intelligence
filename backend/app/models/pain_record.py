@@ -25,6 +25,10 @@ class PainRecord(Base):
             "training_session_id IS NOT NULL OR training_set_id IS NOT NULL",
             name="pain_records_training_context_required_check",
         ),
+        sa.Index("idx_pain_records_user_occurred", "user_id", "occurred_at"),
+        sa.Index("idx_pain_records_session", "training_session_id", "occurred_at"),
+        sa.Index("idx_pain_records_set", "training_set_id"),
+        sa.Index("idx_pain_records_body_region", "body_region_id"),
     )
 
     id: Mapped[str] = mapped_column(

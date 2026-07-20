@@ -35,7 +35,11 @@ export class ApiError extends Error {
 }
 
 export function getApiUrl() {
-  return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error("NEXT_PUBLIC_API_URL não está configurada no frontend.");
+  }
+  return apiUrl.replace(/\/$/, "");
 }
 
 type ApiFetchOptions = RequestInit & {

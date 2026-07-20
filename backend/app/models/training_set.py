@@ -45,6 +45,11 @@ class TrainingSet(Base):
             "set_number",
             name="training_sets_session_exercise_set_number_unique",
         ),
+        sa.Index(
+            "idx_training_sets_session_exercise",
+            "session_exercise_id",
+            "set_number",
+        ),
     )
 
     id: Mapped[str] = mapped_column(

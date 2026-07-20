@@ -14,6 +14,7 @@ class SessionExercise(Base):
             "execution_order",
             name="session_exercises_session_order_unique",
         ),
+        sa.Index("idx_session_exercises_session", "session_id"),
     )
 
     id: Mapped[str] = mapped_column(

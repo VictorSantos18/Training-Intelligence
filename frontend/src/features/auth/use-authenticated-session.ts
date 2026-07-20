@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { getCurrentUser } from "@/lib/api";
+import { ApiError, getCurrentUser } from "@/lib/api";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 import type { AuthSessionState, AuthenticatedSession } from "@/types";
 
@@ -49,6 +49,11 @@ export function useAuthenticatedSession(): AuthenticatedSessionResult {
         setSessionState("authenticated");
       } catch (err) {
         if (!isMounted) {
+          return;
+        }
+        if (err instanceof ApiError && err.status === 401) {
+          await supabase.auth.signOut();
+          router.replace("/login");
           return;
         }
         setError(err instanceof Error ? err.message : "Falha ao validar usuário.");
