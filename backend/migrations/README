@@ -4,3 +4,8 @@ Create the first domain migration after the authentication boundary is in place:
 
 alembic revision --autogenerate -m "create initial domain tables"
 
+Production safety convention:
+
+- Domain tables created in the public schema must enable Row Level Security in the same migration.
+- Do not create anon/authenticated policies unless the frontend intentionally starts using Supabase Data API.
+- Do not use FORCE ROW LEVEL SECURITY; the backend and Alembic use direct database connections.
