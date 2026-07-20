@@ -6,6 +6,7 @@ from pydantic import AliasChoices, AnyHttpUrl, Field, field_validator, model_val
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT_ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
+DatabaseSslMode = Literal["auto", "disable", "prefer", "require", "verify-ca", "verify-full"]
 
 
 class Settings(BaseSettings):
@@ -18,7 +19,7 @@ class Settings(BaseSettings):
     )
     backend_cors_origins: str | None = None
 
-    database_ssl_mode: Literal["auto", "disable", "require"] = "auto"
+    database_ssl_mode: DatabaseSslMode = "auto"
     database_pool_size: int = Field(default=5, ge=1, le=20)
     database_max_overflow: int = Field(default=5, ge=0, le=20)
     database_pool_timeout: int = Field(default=30, ge=1, le=120)
@@ -64,6 +65,9 @@ class Settings(BaseSettings):
     def validate_production_secrets(self) -> "Settings":
         if self.environment != "production":
             return self
+
+        if self.database_ssl_mode == "disable":
+            raise ValueError("DATABASE_SSL_MODE cannot be 'disable' in production")
 
         required_values = {
             "SUPABASE_URL": self.supabase_url,

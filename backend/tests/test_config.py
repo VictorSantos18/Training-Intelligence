@@ -62,10 +62,11 @@ def test_cors_origins_keeps_backend_cors_origins_compatibility() -> None:
     ]
 
 
-def test_database_url_is_converted_to_asyncpg_with_ssl() -> None:
+def test_database_url_is_converted_to_asyncpg_with_require_ssl() -> None:
     settings = make_settings(
         environment="production",
-        database_url="postgresql://user:pass@db.supabase.co:5432/postgres?sslmode=require",
+        database_url="postgresql://user:pass@db.supabase.co:5432/postgres?sslmode=verify-full&ssl=true",
+        database_ssl_mode="require",
         supabase_url="https://project.supabase.co",
         supabase_jwks_url="https://project.supabase.co/auth/v1/.well-known/jwks.json",
         supabase_jwt_issuer="https://project.supabase.co/auth/v1",
@@ -75,4 +76,37 @@ def test_database_url_is_converted_to_asyncpg_with_ssl() -> None:
     database_url, connect_args = build_async_database_url_and_connect_args(settings)
 
     assert database_url == "postgresql+asyncpg://user:pass@db.supabase.co:5432/postgres"
-    assert connect_args == {"ssl": True}
+    assert connect_args == {"ssl": "require"}
+
+
+def test_database_url_uses_query_sslmode_when_ssl_mode_is_auto() -> None:
+    settings = make_settings(
+        database_url="postgresql://user:pass@db.supabase.co:5432/postgres?sslmode=prefer",
+        database_ssl_mode="auto",
+    )
+
+    database_url, connect_args = build_async_database_url_and_connect_args(settings)
+
+    assert database_url == "postgresql+asyncpg://user:pass@db.supabase.co:5432/postgres"
+    assert connect_args == {"ssl": "prefer"}
+
+
+def test_database_url_disables_ssl_in_development() -> None:
+    settings = make_settings(database_ssl_mode="disable")
+
+    database_url, connect_args = build_async_database_url_and_connect_args(settings)
+
+    assert database_url == "postgresql+asyncpg://training:training@localhost:5433/training"
+    assert connect_args == {}
+
+
+def test_production_rejects_disabled_database_ssl() -> None:
+    with pytest.raises(ValidationError):
+        make_settings(
+            environment="production",
+            database_ssl_mode="disable",
+            supabase_url="https://project.supabase.co",
+            supabase_jwks_url="https://project.supabase.co/auth/v1/.well-known/jwks.json",
+            supabase_jwt_issuer="https://project.supabase.co/auth/v1",
+            supabase_jwt_audience="authenticated",
+        )

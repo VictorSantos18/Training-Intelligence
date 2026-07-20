@@ -125,6 +125,10 @@ Ordem recomendada:
 
 1. Configurar Supabase.
 2. Executar migrations no banco de produção.
-3. Publicar backend e configurar a lista de origens permitidas para CORS no Render.
+3. Publicar backend e configurar CORS e SSL do banco no Render.
 4. Publicar frontend.
 5. Validar login, criação de sessão, registro de sets, registro de dor, finalização de sessão e dashboard.
+
+Para o backend em produção usando Supabase, configure o modo de SSL do banco
+por variável de ambiente e deixe a `DATABASE_URL` sem parâmetros `ssl` ou
+`sslmode`, mantendo uma única fonte de configuração.
