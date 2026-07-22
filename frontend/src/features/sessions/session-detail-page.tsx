@@ -142,17 +142,6 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
           <h2>{skillLabel}</h2>
           <p>{new Date(session.started_at).toLocaleString("pt-BR")}</p>
         </div>
-
-        {isSessionOpen ? (
-          <div className={styles.headerActions}>
-            <button type="button" onClick={() => setSessionToFinish(session)}>
-              Finalizar
-            </button>
-            <button className={styles.danger} type="button" onClick={() => setSessionToCancel(session)}>
-              Cancelar
-            </button>
-          </div>
-        ) : null}
       </header>
 
       {feedback ? <p className={styles.success}>{feedback}</p> : null}
@@ -186,7 +175,12 @@ function SessionDetailContent({ accessToken, sessionId }: SessionDetailContentPr
         </section>
       ) : null}
 
-      <SessionExecutionPanel accessToken={accessToken} session={session} />
+      <SessionExecutionPanel
+        accessToken={accessToken}
+        session={session}
+        onRequestCancelSession={setSessionToCancel}
+        onRequestFinishSession={setSessionToFinish}
+      />
 
       {sessionToFinish ? (
         <SessionFinishForm

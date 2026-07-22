@@ -1,16 +1,16 @@
 .panel {
   display: grid;
   gap: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: rgba(17, 16, 26, 0.72);
-  padding: 18px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   gap: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: rgba(17, 16, 26, 0.72);
+  padding: 18px;
 }
 
 .header h3,
@@ -40,6 +40,40 @@
   font-weight: 800;
 }
 
+.header button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-soft);
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.header .primaryAction {
+  border-color: rgba(52, 211, 153, 0.34);
+  background: rgba(6, 95, 70, 0.18);
+  color: var(--color-success);
+}
+
+.header .primaryAction:hover {
+  border-color: rgba(52, 211, 153, 0.62);
+  color: var(--color-success);
+}
+
+.header .dangerAction {
+  border-color: rgba(248, 113, 113, 0.32);
+  background: rgba(127, 29, 29, 0.12);
+  color: #fca5a5;
+}
+
+.header .dangerAction:hover {
+  border-color: rgba(248, 113, 113, 0.58);
+  color: #fecaca;
+}
+
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
@@ -56,6 +90,10 @@
   display: grid;
   gap: 14px;
   align-content: start;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  padding: 18px;
 }
 
 .column h4,
@@ -216,5 +254,8 @@
   .sectionHeader {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .headerActions {
+    justify-content: center;
   }
 }

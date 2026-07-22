@@ -172,7 +172,6 @@ export type TrainingSetFormValues = {
   duration_seconds: string;
   assistance_level: string;
   rpe: string;
-  pain_during: string;
   result: TrainingSetResult;
   technical_quality: "" | TechnicalQuality;
   rest_seconds: string;

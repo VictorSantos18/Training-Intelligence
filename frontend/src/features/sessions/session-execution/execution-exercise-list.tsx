@@ -54,7 +54,6 @@ function getTrainingSetFormValues(set: TrainingSet): TrainingSetFormValues {
     duration_seconds: set.duration_seconds ?? "",
     assistance_level: set.assistance_level ?? "",
     rpe: set.rpe ?? "",
-    pain_during: set.pain_during === null ? "" : String(set.pain_during),
     result: set.result,
     technical_quality: set.technical_quality ?? "",
     rest_seconds: set.rest_seconds === null ? "" : String(set.rest_seconds),

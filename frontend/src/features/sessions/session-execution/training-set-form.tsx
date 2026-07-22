@@ -16,7 +16,6 @@ const setSchema = z
     duration_seconds: z.string().optional().default(""),
     assistance_level: z.string().optional().default(""),
     rpe: z.string().optional().default(""),
-    pain_during: z.string().optional().default(""),
     result: z.enum(["SUCCESS", "PARTIAL", "FAILED", "SKIPPED"]),
     technical_quality: z.enum(["", "EXCELLENT", "GOOD", "ACCEPTABLE", "POOR"]),
     rest_seconds: z.string().optional().default(""),
@@ -47,7 +46,6 @@ function getDefaultValues(nextSetNumber: number, initialValues?: TrainingSetForm
     duration_seconds: initialValues?.duration_seconds ?? "",
     assistance_level: initialValues?.assistance_level ?? "",
     rpe: initialValues?.rpe ?? "",
-    pain_during: initialValues?.pain_during ?? "",
     result: initialValues?.result ?? "SUCCESS",
     technical_quality: initialValues?.technical_quality ?? "",
     rest_seconds: initialValues?.rest_seconds ?? "",
@@ -110,14 +108,6 @@ export function TrainingSetForm({
         step="0.1"
         type="number"
         {...register("rpe")}
-      />
-      <input
-        aria-label="Dor durante"
-        max="10"
-        min="0"
-        placeholder="Dor"
-        type="number"
-        {...register("pain_during")}
       />
       <select aria-label="Resultado" {...register("result")}>
         <option value="SUCCESS">Sucesso</option>

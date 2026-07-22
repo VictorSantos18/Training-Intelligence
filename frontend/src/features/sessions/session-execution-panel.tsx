@@ -41,6 +41,8 @@ import styles from "./session-execution-panel.module.css";
 type SessionExecutionPanelProps = {
   accessToken: string;
   session: TrainingSession;
+  onRequestCancelSession: (session: TrainingSession) => void;
+  onRequestFinishSession: (session: TrainingSession) => void;
 };
 
 type DeleteTarget =
@@ -70,7 +72,6 @@ function buildTrainingSetPayload(values: TrainingSetFormValues) {
     duration_seconds: decimalOrNull(values.duration_seconds),
     assistance_level: decimalOrNull(values.assistance_level),
     rpe: decimalOrNull(values.rpe),
-    pain_during: numberOrNull(values.pain_during),
     result: values.result,
     technical_quality: values.technical_quality || null,
     rest_seconds: numberOrNull(values.rest_seconds),
@@ -162,7 +163,12 @@ function getDeleteConfirmLabel(deleteTarget: DeleteTarget | null) {
   return "Excluir dor";
 }
 
-export function SessionExecutionPanel({ accessToken, session }: SessionExecutionPanelProps) {
+export function SessionExecutionPanel({
+  accessToken,
+  session,
+  onRequestCancelSession,
+  onRequestFinishSession,
+}: SessionExecutionPanelProps) {
   const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
   const [bodyRegions, setBodyRegions] = useState<BodyRegion[]>([]);
   const [sessionExercises, setSessionExercises] = useState<SessionExercise[]>([]);
@@ -238,8 +244,23 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
   }, [bodyRegions]);
 
   const allSets = useMemo(() => {
-    return Object.values(setsBySessionExercise).flat();
-  }, [setsBySessionExercise]);
+    return sessionExercises.flatMap(
+      (sessionExercise) => setsBySessionExercise[sessionExercise.id] ?? [],
+    );
+  }, [sessionExercises, setsBySessionExercise]);
+
+  const setLabelById = useMemo(() => {
+    return sessionExercises.reduce<Record<string, string>>((acc, sessionExercise) => {
+      const exerciseName = exerciseNameById[sessionExercise.exercise_id] ?? "Exercício";
+      const sets = setsBySessionExercise[sessionExercise.id] ?? [];
+
+      sets.forEach((set) => {
+        acc[set.id] = `${exerciseName} - set ${set.set_number}`;
+      });
+
+      return acc;
+    }, {});
+  }, [exerciseNameById, sessionExercises, setsBySessionExercise]);
 
   const totalSuccessfulSets = useMemo(() => {
     return allSets.filter((set) => set.result === "SUCCESS").length;
@@ -453,9 +474,29 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
               : "Revise exercícios, sets registrados e sinais de dor desta sessão."}
           </p>
         </div>
-        <button type="button" onClick={loadExecution}>
-          Atualizar
-        </button>
+        <div className={styles.headerActions}>
+          {isSessionOpen ? (
+            <>
+              <button
+                className={styles.primaryAction}
+                type="button"
+                onClick={() => onRequestFinishSession(session)}
+              >
+                Finalizar
+              </button>
+              <button
+                className={styles.dangerAction}
+                type="button"
+                onClick={() => onRequestCancelSession(session)}
+              >
+                Cancelar
+              </button>
+            </>
+          ) : null}
+          <button type="button" onClick={loadExecution}>
+            Atualizar
+          </button>
+        </div>
       </header>
 
       {feedback ? <p className={styles.success}>{feedback}</p> : null}
@@ -525,6 +566,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
             {isSessionOpen ? (
               <PainRecordForm
                 bodyRegions={bodyRegions}
+                setLabelById={setLabelById}
                 sets={allSets}
                 onSubmit={handleCreatePainRecord}
               />
@@ -573,6 +615,7 @@ export function SessionExecutionPanel({ accessToken, session }: SessionExecution
                           canChooseSet={false}
                           initialValues={getPainRecordFormValues(record)}
                           resetOnSubmit={false}
+                          setLabelById={setLabelById}
                           sets={allSets}
                           submitLabel="Salvar dor"
                           submittingLabel="Salvando..."

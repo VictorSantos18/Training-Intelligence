@@ -48,13 +48,6 @@
   text-transform: uppercase;
 }
 
-.headerActions {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.headerActions button,
 .empty a {
   min-height: 42px;
   display: inline-grid;
@@ -69,15 +62,9 @@
   text-decoration: none;
 }
 
-.headerActions button:hover,
 .empty a:hover {
   border-color: var(--color-primary);
   color: var(--color-primary-soft);
-}
-
-.headerActions .danger:hover {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
 }
 
 .summary {
@@ -186,7 +173,6 @@
     font-size: 1.85rem;
   }
 
-  .headerActions,
   .summary {
     grid-template-columns: 1fr;
   }

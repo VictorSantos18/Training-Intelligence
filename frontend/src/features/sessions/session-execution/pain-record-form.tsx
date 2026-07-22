@@ -35,6 +35,7 @@ type PainRecordFormProps = {
   canChooseSet?: boolean;
   initialValues?: PainRecordFormValues;
   resetOnSubmit?: boolean;
+  setLabelById?: Record<string, string>;
   sets: TrainingSet[];
   submitLabel?: string;
   submittingLabel?: string;
@@ -60,6 +61,7 @@ export function PainRecordForm({
   canChooseSet = true,
   initialValues,
   resetOnSubmit = true,
+  setLabelById = {},
   sets,
   submitLabel = "Registrar dor",
   submittingLabel = "Registrando...",
@@ -110,7 +112,7 @@ export function PainRecordForm({
             <option value="">Sem set específico</option>
             {sets.map((set) => (
               <option key={set.id} value={set.id}>
-                Set {set.set_number}
+                {setLabelById[set.id] ?? `Set ${set.set_number}`}
               </option>
             ))}
           </select>
@@ -121,7 +123,7 @@ export function PainRecordForm({
               <option value="">Sem set específico</option>
               {sets.map((set) => (
                 <option key={set.id} value={set.id}>
-                  Set {set.set_number}
+                  {setLabelById[set.id] ?? `Set ${set.set_number}`}
                 </option>
               ))}
             </select>
