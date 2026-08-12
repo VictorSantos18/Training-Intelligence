@@ -60,10 +60,23 @@ function numberOrNull(value: string) {
   return trimmedValue ? Number(trimmedValue) : null;
 }
 
+function buildRestSeconds(values: TrainingSetFormValues) {
+  const trimmedRestTime = values.rest_time.trim();
+
+  if (!trimmedRestTime) {
+    return null;
+  }
+
+  const [minutes, seconds] = trimmedRestTime.split(":").map(Number);
+  return minutes * 60 + seconds;
+}
+
 function decimalOrNull(value: string) {
   const trimmedValue = value.trim();
   return trimmedValue ? trimmedValue : null;
 }
+
+const DEFAULT_PAIN_RECORD_SIDE = "NOT_APPLICABLE";
 
 function buildTrainingSetPayload(values: TrainingSetFormValues) {
   return {
@@ -74,7 +87,7 @@ function buildTrainingSetPayload(values: TrainingSetFormValues) {
     rpe: decimalOrNull(values.rpe),
     result: values.result,
     technical_quality: values.technical_quality || null,
-    rest_seconds: numberOrNull(values.rest_seconds),
+    rest_seconds: buildRestSeconds(values),
     notes: emptyToNull(values.notes),
   };
 }
@@ -87,7 +100,7 @@ function buildPainRecordCreatePayload(
     training_session_id: sessionId,
     training_set_id: values.training_set_id || null,
     body_region_id: values.body_region_id,
-    side: values.side,
+    side: DEFAULT_PAIN_RECORD_SIDE,
     moment: values.moment,
     intensity: Number(values.intensity),
     description: emptyToNull(values.description),
@@ -98,7 +111,7 @@ function buildPainRecordCreatePayload(
 function buildPainRecordUpdatePayload(values: PainRecordFormValues): PainRecordUpdatePayload {
   return {
     body_region_id: values.body_region_id,
-    side: values.side,
+    side: DEFAULT_PAIN_RECORD_SIDE,
     moment: values.moment,
     intensity: Number(values.intensity),
     description: emptyToNull(values.description),
@@ -110,7 +123,6 @@ function getPainRecordFormValues(record: PainRecord): PainRecordFormValues {
   return {
     training_set_id: record.training_set_id ?? "",
     body_region_id: record.body_region_id,
-    side: record.side,
     moment: record.moment,
     intensity: String(record.intensity),
     description: record.description ?? "",
@@ -124,13 +136,6 @@ const painMomentLabels = {
   POST_SESSION: "Pós-sessão",
   CHECKIN_24H: "Check-in 24h",
   CHECKIN_48H: "Check-in 48h",
-};
-
-const painSideLabels = {
-  LEFT: "Esquerdo",
-  RIGHT: "Direito",
-  BILATERAL: "Bilateral",
-  NOT_APPLICABLE: "Não aplicável",
 };
 
 function getDeleteTitle(deleteTarget: DeleteTarget | null) {
@@ -583,8 +588,7 @@ export function SessionExecutionPanel({
                     <article className={styles.painCard} key={record.id}>
                       <strong>{bodyRegionNameById[record.body_region_id] ?? "Região"}</strong>
                       <span>
-                        {painMomentLabels[record.moment]} - {painSideLabels[record.side]} -
-                        intensidade {record.intensity}/10
+                        {painMomentLabels[record.moment]} - intensidade {record.intensity}/10
                       </span>
                       {record.description ? <p>{record.description}</p> : null}
                       {record.notes ? <p>{record.notes}</p> : null}

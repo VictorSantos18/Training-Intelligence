@@ -39,6 +39,16 @@ const resultLabels = {
   SKIPPED: "Pulada",
 };
 
+function formatRestTime(restSeconds: number | null) {
+  if (restSeconds === null) {
+    return "";
+  }
+
+  const minutes = Math.floor(restSeconds / 60);
+  const seconds = String(restSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
 function getSessionExerciseFormValues(sessionExercise: SessionExercise): SessionExerciseFormValues {
   return {
     exercise_id: sessionExercise.exercise_id,
@@ -56,7 +66,7 @@ function getTrainingSetFormValues(set: TrainingSet): TrainingSetFormValues {
     rpe: set.rpe ?? "",
     result: set.result,
     technical_quality: set.technical_quality ?? "",
-    rest_seconds: set.rest_seconds === null ? "" : String(set.rest_seconds),
+    rest_time: formatRestTime(set.rest_seconds),
     notes: set.notes ?? "",
   };
 }

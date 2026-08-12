@@ -13,7 +13,6 @@ const painSchema = z
   .object({
     training_set_id: z.string().optional().default(""),
     body_region_id: z.string().min(1, "Escolha a região."),
-    side: z.enum(["LEFT", "RIGHT", "BILATERAL", "NOT_APPLICABLE"]),
     moment: z.enum(["PRE_SESSION", "DURING_SET", "POST_SESSION", "CHECKIN_24H", "CHECKIN_48H"]),
     intensity: z
       .string()
@@ -45,7 +44,6 @@ type PainRecordFormProps = {
 const emptyValues: PainRecordFormValues = {
   training_set_id: "",
   body_region_id: "",
-  side: "NOT_APPLICABLE",
   moment: "POST_SESSION",
   intensity: "0",
   description: "",
@@ -143,16 +141,6 @@ export function PainRecordForm({
           ))}
         </select>
         {errors.body_region_id ? <small>{errors.body_region_id.message}</small> : null}
-      </label>
-
-      <label>
-        <span>Lado</span>
-        <select {...register("side")}>
-          <option value="NOT_APPLICABLE">Não aplicável</option>
-          <option value="LEFT">Esquerdo</option>
-          <option value="RIGHT">Direito</option>
-          <option value="BILATERAL">Bilateral</option>
-        </select>
       </label>
 
       <label>

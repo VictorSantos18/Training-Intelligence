@@ -28,13 +28,6 @@ BODY_REGIONS = [
     ("right_elbow", "Cotovelo direito"),
     ("left_wrist", "Punho esquerdo"),
     ("right_wrist", "Punho direito"),
-    ("left_hip", "Quadril esquerdo"),
-    ("right_hip", "Quadril direito"),
-    ("left_knee", "Joelho esquerdo"),
-    ("right_knee", "Joelho direito"),
-    ("left_ankle", "Tornozelo esquerdo"),
-    ("right_ankle", "Tornozelo direito"),
-    ("other", "Outra região"),
 ]
 
 

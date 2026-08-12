@@ -18,8 +18,16 @@ const setSchema = z
     rpe: z.string().optional().default(""),
     result: z.enum(["SUCCESS", "PARTIAL", "FAILED", "SKIPPED"]),
     technical_quality: z.enum(["", "EXCELLENT", "GOOD", "ACCEPTABLE", "POOR"]),
-    rest_seconds: z.string().optional().default(""),
+    rest_time: z.string().optional().default(""),
     notes: z.string().optional().default(""),
+  })
+  .refine((values) => values.rpe === "" || (Number(values.rpe) >= 0 && Number(values.rpe) <= 10), {
+    message: "RPE precisa ser entre 0 e 10.",
+    path: ["rpe"],
+  })
+  .refine((values) => values.rest_time === "" || /^\d{1,3}:[0-5]\d$/.test(values.rest_time), {
+    message: "Use o formato mm:ss, por exemplo 2:30.",
+    path: ["rest_time"],
   })
   .refine(
     (values) =>
@@ -48,9 +56,53 @@ function getDefaultValues(nextSetNumber: number, initialValues?: TrainingSetForm
     rpe: initialValues?.rpe ?? "",
     result: initialValues?.result ?? "SUCCESS",
     technical_quality: initialValues?.technical_quality ?? "",
-    rest_seconds: initialValues?.rest_seconds ?? "",
+    rest_time: initialValues?.rest_time ?? "",
     notes: initialValues?.notes ?? "",
   };
+}
+
+function clampNumberString(value: string, max: number) {
+  if (value === "") {
+    return "";
+  }
+
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return "";
+  }
+
+  return String(Math.min(max, Math.max(0, numericValue)));
+}
+
+function formatRestTimeInput(value: string) {
+  if (value.includes(":")) {
+    const [minutes = "", seconds = ""] = value.split(":");
+    return `${minutes.replace(/\D/g, "").slice(0, 3)}:${seconds.replace(/\D/g, "").slice(0, 2)}`;
+  }
+
+  const digits = value.replace(/\D/g, "").slice(0, 5);
+  if (digits.length <= 2) {
+    return digits;
+  }
+
+  return `${digits.slice(0, -2)}:${digits.slice(-2)}`;
+}
+
+function normalizeRestTime(value: string) {
+  const formattedValue = formatRestTimeInput(value);
+  if (!formattedValue) {
+    return "";
+  }
+
+  const [minutesValue, secondsValue = ""] = formattedValue.split(":");
+  const minutes = Number(minutesValue || "0");
+  const seconds = Number(secondsValue.padStart(2, "0"));
+
+  if (!Number.isFinite(minutes) || !Number.isFinite(seconds)) {
+    return "";
+  }
+
+  return `${Math.min(minutes, 600)}:${String(Math.min(seconds, 59)).padStart(2, "0")}`;
 }
 
 export function TrainingSetForm({
@@ -65,6 +117,7 @@ export function TrainingSetForm({
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<TrainingSetFormValues>({
     resolver: zodResolver(setSchema),
@@ -107,7 +160,13 @@ export function TrainingSetForm({
         placeholder="RPE"
         step="0.1"
         type="number"
-        {...register("rpe")}
+        {...register("rpe", {
+          onChange: (event) => {
+            setValue("rpe", clampNumberString(event.target.value, 10), {
+              shouldValidate: true,
+            });
+          },
+        })}
       />
       <select aria-label="Resultado" {...register("result")}>
         <option value="SUCCESS">Sucesso</option>
@@ -123,12 +182,23 @@ export function TrainingSetForm({
         <option value="POOR">Ruim</option>
       </select>
       <input
-        aria-label="Descanso em segundos"
-        min="0"
+        aria-label="Tempo de descanso"
+        inputMode="numeric"
         placeholder="Descanso"
-        type="number"
-        {...register("rest_seconds")}
+        type="text"
+        {...register("rest_time", {
+          onBlur: (event) => {
+            setValue("rest_time", normalizeRestTime(event.target.value), {
+              shouldValidate: true,
+            });
+          },
+          onChange: (event) => {
+            setValue("rest_time", formatRestTimeInput(event.target.value));
+          },
+        })}
       />
+      {errors.rpe ? <small>{errors.rpe.message}</small> : null}
+      {errors.rest_time ? <small>{errors.rest_time.message}</small> : null}
       <input
         aria-label="Notas do set"
         className={styles.notesInput}

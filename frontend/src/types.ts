@@ -174,7 +174,7 @@ export type TrainingSetFormValues = {
   rpe: string;
   result: TrainingSetResult;
   technical_quality: "" | TechnicalQuality;
-  rest_seconds: string;
+  rest_time: string;
   notes: string;
 };
 
@@ -229,7 +229,6 @@ export type PainRecord = {
 export type PainRecordFormValues = {
   training_set_id: string;
   body_region_id: string;
-  side: PainRecordSide;
   moment: PainRecordMoment;
   intensity: string;
   description: string;
