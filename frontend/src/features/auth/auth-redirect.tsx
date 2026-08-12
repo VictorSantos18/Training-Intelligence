@@ -4,24 +4,26 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { LoadingState } from "@/components/ui/loading-state";
-import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
+import { useAuthenticatedSession } from "@/features/auth/use-authenticated-session";
 
 export function AuthRedirect() {
   const router = useRouter();
+  const { sessionState, session } = useAuthenticatedSession();
 
   useEffect(() => {
-    if (!isSupabaseConfigured()) {
-      router.replace("/login");
+    if (sessionState === "checking") {
       return;
     }
 
-    getSupabaseClient()
-      .auth.getSession()
-      .then(({ data }) => {
-        router.replace(data.session ? "/dashboard" : "/login");
-      })
-      .catch(() => router.replace("/login"));
-  }, [router]);
+    if (session) {
+      router.replace("/dashboard");
+      return;
+    }
+
+    if (sessionState === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [router, session, sessionState]);
 
   return (
     <LoadingState

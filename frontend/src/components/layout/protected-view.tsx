@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -22,11 +22,26 @@ export function ProtectedView({
   const router = useRouter();
   const { sessionState, session, error } = useAuthenticatedSession();
 
+  useEffect(() => {
+    if (sessionState === "unauthenticated" && !session && !error) {
+      router.replace("/login");
+    }
+  }, [error, router, session, sessionState]);
+
   if (sessionState === "checking") {
     return (
       <LoadingState
         title="Validando sessão"
         message="Estamos conferindo seu acesso e preparando seu painel."
+      />
+    );
+  }
+
+  if (!session && !error) {
+    return (
+      <LoadingState
+        title="Redirecionando"
+        message="Vamos levar você para a tela de login."
       />
     );
   }
