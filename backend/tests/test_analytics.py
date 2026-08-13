@@ -9,6 +9,8 @@ from app.db.session import get_db_session
 from app.main import create_app
 from app.modules.analytics.router import analytics_service
 from app.modules.analytics.schemas import (
+    AnalysisReportListItem,
+    AnalysisReportRead,
     AnalyticsOverview,
     AnalyticsStats,
     PainByRegionItem,
@@ -22,6 +24,7 @@ SESSION_ID = "37d23d66-b1f2-4f41-bb03-4f90728451cd"
 SKILL_ID = "2cc2e4e3-e961-46ff-9679-156c79ffed69"
 EXERCISE_ID = "0e7d1ec7-9969-4f28-bf52-f3d611578ed1"
 BODY_REGION_ID = "54b4db76-5ddd-44c6-9d2c-ce951cc7106d"
+REPORT_ID = "8cb19108-c8c7-426e-a8d7-d1f5da71a44b"
 
 
 async def override_current_user() -> CurrentUser:
@@ -96,6 +99,42 @@ def make_overview() -> AnalyticsOverview:
     )
 
 
+def make_report(**overrides: object) -> AnalysisReportRead:
+    now = datetime.now(UTC)
+    values = {
+        "id": REPORT_ID,
+        "skill_id": SKILL_ID,
+        "title": "Front Lever - 2026-07-13 a 2026-07-19",
+        "period_start": "2026-07-13",
+        "period_end": "2026-07-19",
+        "filters": {
+            "period_start": "2026-07-13",
+            "period_end": "2026-07-19",
+            "skill_id": SKILL_ID,
+            "skill_name": "Front Lever",
+            "status": "COMPLETED",
+        },
+        "summary_snapshot": {
+            "total_sessions": 2,
+            "total_sets": 12,
+            "sessions": [],
+        },
+        "generated_prompt": "# Análise de treino",
+        "external_analysis": None,
+        "status": "PROMPT_GENERATED",
+        "created_at": now,
+        "updated_at": now,
+        "sessions": [],
+    }
+    values.update(overrides)
+    return AnalysisReportRead.model_validate(values)
+
+
+def make_report_item(**overrides: object) -> AnalysisReportListItem:
+    report = make_report(**overrides)
+    return AnalysisReportListItem.model_validate(report)
+
+
 def test_get_analytics_overview_uses_current_user_id() -> None:
     client = make_client()
     analytics_service.get_overview = AsyncMock(return_value=make_overview())
@@ -107,3 +146,85 @@ def test_get_analytics_overview_uses_current_user_id() -> None:
     assert response.json()["sessions_by_skill"][0]["skill_name"] == "Front Lever"
     _, user_id = analytics_service.get_overview.await_args.args
     assert user_id == USER_ID
+
+
+def test_list_analysis_reports_uses_current_user_id() -> None:
+    client = make_client()
+    analytics_service.list_reports = AsyncMock(return_value=[make_report_item()])
+
+    response = client.get("/analytics/reports")
+
+    assert response.status_code == 200
+    assert response.json()[0]["title"] == "Front Lever - 2026-07-13 a 2026-07-19"
+    _, user_id, limit = analytics_service.list_reports.await_args.args
+    assert user_id == USER_ID
+    assert limit == 20
+
+
+def test_generate_analysis_report_rejects_user_id_from_body() -> None:
+    client = make_client()
+
+    response = client.post(
+        "/analytics/reports",
+        json={
+            "user_id": "b5a01308-78ea-477a-9205-5e010e5d37c7",
+            "period_start": "2026-07-13",
+            "period_end": "2026-07-19",
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_generate_analysis_report_uses_current_user_id() -> None:
+    client = make_client()
+    analytics_service.generate_report = AsyncMock(return_value=make_report())
+
+    response = client.post(
+        "/analytics/reports",
+        json={
+            "period_start": "2026-07-13",
+            "period_end": "2026-07-19",
+            "skill_id": SKILL_ID,
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["generated_prompt"] == "# Análise de treino"
+    _, user_id, payload = analytics_service.generate_report.await_args.args
+    assert user_id == USER_ID
+    assert str(payload.skill_id) == SKILL_ID
+
+
+def test_get_analysis_report_uses_current_user_id() -> None:
+    client = make_client()
+    analytics_service.get_report = AsyncMock(return_value=make_report())
+
+    response = client.get(f"/analytics/reports/{REPORT_ID}")
+
+    assert response.status_code == 200
+    _, report_id, user_id = analytics_service.get_report.await_args.args
+    assert str(report_id) == REPORT_ID
+    assert user_id == USER_ID
+
+
+def test_update_analysis_report_uses_current_user_id() -> None:
+    client = make_client()
+    analytics_service.update_report = AsyncMock(
+        return_value=make_report(
+            external_analysis="Manter volume e observar ombro.",
+            status="ANALYSIS_SAVED",
+        )
+    )
+
+    response = client.patch(
+        f"/analytics/reports/{REPORT_ID}",
+        json={"external_analysis": "Manter volume e observar ombro."},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ANALYSIS_SAVED"
+    _, report_id, user_id, payload = analytics_service.update_report.await_args.args
+    assert str(report_id) == REPORT_ID
+    assert user_id == USER_ID
+    assert payload.external_analysis == "Manter volume e observar ombro."

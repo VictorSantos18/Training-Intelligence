@@ -1,8 +1,16 @@
-from datetime import datetime
+from datetime import date, datetime
+from enum import StrEnum
+from typing import Any
+from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.modules.sessions.schemas import TrainingSessionStatus
+
+
+class AnalysisReportStatus(StrEnum):
+    prompt_generated = "PROMPT_GENERATED"
+    analysis_saved = "ANALYSIS_SAVED"
 
 
 class AnalyticsStats(BaseModel):
@@ -54,3 +62,78 @@ class AnalyticsOverview(BaseModel):
     recent_sessions: list[RecentSessionItem]
     top_exercises: list[TopExerciseItem]
     pain_by_region: list[PainByRegionItem]
+
+
+class AnalysisReportGenerate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    period_start: date
+    period_end: date
+    skill_id: UUID | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+
+    @model_validator(mode="after")
+    def validate_period(self) -> "AnalysisReportGenerate":
+        if self.period_end < self.period_start:
+            raise ValueError("period_end must be greater than or equal to period_start")
+        return self
+
+
+class AnalysisReportUpdate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+    external_analysis: str | None = None
+
+    @field_validator("title", mode="before")
+    @classmethod
+    def disallow_null_title(cls, value: Any) -> Any:
+        if value is None:
+            raise ValueError("Field cannot be null")
+        return value
+
+    @model_validator(mode="after")
+    def require_at_least_one_field(self) -> "AnalysisReportUpdate":
+        if not self.model_fields_set:
+            raise ValueError("At least one field must be provided")
+        return self
+
+
+class AnalysisReportSessionLinkRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    analysis_report_id: str
+    training_session_id: str
+    created_at: datetime
+
+
+class AnalysisReportRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    skill_id: str | None
+    title: str
+    period_start: date
+    period_end: date
+    filters: dict[str, Any]
+    summary_snapshot: dict[str, Any]
+    generated_prompt: str
+    external_analysis: str | None
+    status: AnalysisReportStatus
+    created_at: datetime
+    updated_at: datetime
+    sessions: list[AnalysisReportSessionLinkRead] = []
+
+
+class AnalysisReportListItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    skill_id: str | None
+    title: str
+    period_start: date
+    period_end: date
+    status: AnalysisReportStatus
+    created_at: datetime
+    updated_at: datetime
