@@ -56,6 +56,12 @@ export function AppShell({ user, children }: AppShellProps) {
           >
             Sessões
           </Link>
+          <Link
+            className={pathname === "/analytics" ? styles.navItemActive : styles.navItem}
+            href="/analytics"
+          >
+            Análises
+          </Link>
         </nav>
 
         <div className={styles.account}>

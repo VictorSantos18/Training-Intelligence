@@ -305,3 +305,73 @@ export type AnalyticsOverview = {
   top_exercises: TopExerciseItem[];
   pain_by_region: PainByRegionItem[];
 };
+
+export type AnalysisReportStatus = "PROMPT_GENERATED" | "ANALYSIS_SAVED";
+
+export type AnalysisReportSessionLink = {
+  id: string;
+  analysis_report_id: string;
+  training_session_id: string;
+  created_at: string;
+};
+
+export type AnalysisReportSummarySnapshot = {
+  total_sessions: number;
+  total_sets: number;
+  total_repetitions: number;
+  total_duration_seconds: number;
+  average_rpe: number | null;
+  average_energy_before: number | null;
+  average_sleep_hours: number | null;
+  max_pain_intensity: number | null;
+  pain_records_count: number;
+  skills: string[];
+  sessions: unknown[];
+};
+
+export type AnalysisReport = {
+  id: string;
+  skill_id: string | null;
+  title: string;
+  period_start: string;
+  period_end: string;
+  filters: Record<string, unknown>;
+  summary_snapshot: AnalysisReportSummarySnapshot;
+  generated_prompt: string;
+  external_analysis: string | null;
+  status: AnalysisReportStatus;
+  created_at: string;
+  updated_at: string;
+  sessions: AnalysisReportSessionLink[];
+};
+
+export type AnalysisReportListItem = Pick<
+  AnalysisReport,
+  | "id"
+  | "skill_id"
+  | "title"
+  | "period_start"
+  | "period_end"
+  | "status"
+  | "created_at"
+  | "updated_at"
+>;
+
+export type AnalysisReportGeneratePayload = {
+  period_start: string;
+  period_end: string;
+  skill_id?: string | null;
+  title?: string | null;
+};
+
+export type AnalysisReportUpdatePayload = {
+  title?: string;
+  external_analysis?: string | null;
+};
+
+export type AnalysisReportFormValues = {
+  period_start: string;
+  period_end: string;
+  skill_id: string;
+  title: string;
+};

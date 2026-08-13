@@ -1,0 +1,129 @@
+.page {
+  display: grid;
+  gap: 26px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 28px;
+}
+
+.header h2,
+.header p {
+  margin: 0;
+}
+
+.header h2 {
+  margin-top: 8px;
+  max-width: 760px;
+  color: var(--color-text);
+  font-size: 2.35rem;
+  line-height: 1.1;
+}
+
+.header p:not(.eyebrow) {
+  max-width: 720px;
+  margin-top: 14px;
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+.eyebrow {
+  color: var(--color-primary-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.refresh {
+  min-height: 42px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0 16px;
+  font-weight: 800;
+}
+
+.refresh:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-soft);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: minmax(290px, 380px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.sideColumn {
+  display: grid;
+  gap: 18px;
+}
+
+.panel,
+.detailPanel {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  padding: 22px;
+}
+
+.panelHeader {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.panelHeader h3,
+.panelHeader p {
+  margin: 0;
+}
+
+.panelHeader h3 {
+  color: var(--color-text);
+  font-size: 1.05rem;
+}
+
+.panelHeader p {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.error {
+  margin: 0;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 8px;
+  background: rgba(127, 29, 29, 0.18);
+  color: var(--color-danger);
+  padding: 12px;
+}
+
+@media (max-width: 1080px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .header h2 {
+    font-size: 1.85rem;
+  }
+
+  .panel,
+  .detailPanel {
+    padding: 18px;
+  }
+}

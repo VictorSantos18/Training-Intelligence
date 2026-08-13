@@ -231,23 +231,40 @@ class AnalyticsService:
             "# Análise de treino",
             "",
             "Você é um analista de treino especializado em calistenia e progressão de skills.",
-            "Use exclusivamente os dados fornecidos abaixo e destaque claramente quando algum dado importante estiver",
+            "Use exclusivamente os dados fornecidos abaixo e destaque claramente quando algum",
+            "dado importante estiver",
             "ausente ou insuficiente para uma conclusão segura.",
             "",
             "Objetivo da análise:",
             "- avaliar o volume total, o volume por skill e o volume por exercício;",
             "- identificar sinais de fadiga, acúmulo de carga ou recuperação insuficiente;",
             "- relacionar RPE, sono, energia, descanso entre séries e dor/desconforto;",
-            "- indicar se a próxima semana deve ser de progressão, manutenção, deload ou manter como está por hora;",
+            "- indicar se a próxima semana deve ser de progressão, manutenção, deload ou",
+            "  manter como está por hora;",
             "- sugerir ajustes objetivos em séries, repetições, tempo de isometria, descanso ou",
             "  escolha de exercícios, quando os dados sustentarem essa recomendação.",
             "",
             "Formato esperado da resposta:",
+            "",
+            "1. Análise completa",
             "- resumo executivo curto;",
             "- leitura do volume e da intensidade;",
             "- leitura de fadiga, recuperação e dor;",
             "- decisão recomendada para a próxima semana;",
-            "- plano prático de ajuste, com recomendações conservadoras e justificadas.",
+            "- plano prático de ajuste, com recomendações conservadoras e justificadas;",
+            "- seção de limitações dos dados, quando houver inconsistências, campos ausentes ou",
+            "  informações subjetivas que impeçam uma conclusão mais segura.",
+            "",
+            "2. Resumo para salvar no app",
+            "Ao final da resposta, crie a seção \"Resumo para salvar no app\".",
+            "Essa seção deve ser curta, direta e acionável, em texto simples, sem tabela, para",
+            "eu copiar e salvar no meu app.",
+            "Ela deve conter:",
+            "- decisão principal: progressão, manutenção, deload ou manter como está;",
+            "- 3 a 5 pontos principais da análise;",
+            "- plano prático para a próxima semana;",
+            "- critérios para progredir ou fazer deload;",
+            "- limitações importantes dos dados.",
             "",
             f"## Relatório: {title}",
             f"- Período: {filters['period_start']} a {filters['period_end']}",
@@ -258,7 +275,8 @@ class AnalyticsService:
             f"- Sessões finalizadas: {summary_snapshot['total_sessions']}",
             f"- Séries registradas: {summary_snapshot['total_sets']}",
             f"- Repetições totais: {summary_snapshot['total_repetitions']}",
-            f"- Tempo total em isometria/execução: {summary_snapshot['total_duration_seconds']}s",
+            "- Tempo total em isometria/execução: "
+            f"{self._format_total_duration(summary_snapshot['total_duration_seconds'])}",
             f"- RPE médio: {summary_snapshot['average_rpe']}",
             f"- Energia média antes do treino: {summary_snapshot['average_energy_before']}",
             f"- Sono médio: {summary_snapshot['average_sleep_hours']}h",
@@ -287,10 +305,10 @@ class AnalyticsService:
                     lines.append(
                         "  - Set "
                         f"{training_set['set_number']}: reps={training_set['repetitions']}, "
-                        f"duração={training_set['duration_seconds']}s, "
+                        f"duração={self._format_duration(training_set['duration_seconds'])}, "
                         f"RPE={training_set['rpe']}, "
                         f"resultado={training_set['result']}, "
-                        f"descanso={training_set['rest_seconds']}s, "
+                        f"descanso={self._format_rest(training_set['rest_seconds'])}, "
                         f"notas={training_set['notes'] or 'sem notas'}"
                     )
             if training_session["pain_records"]:
@@ -305,3 +323,25 @@ class AnalyticsService:
                         f"notas={pain_record['notes'] or 'sem notas'}"
                     )
         return "\n".join(lines)
+
+    def _format_total_duration(self, duration_seconds: float | int | None) -> str:
+        if not duration_seconds:
+            return "não registrado"
+        return self._format_seconds(duration_seconds)
+
+    def _format_duration(self, duration_seconds: float | int | None) -> str:
+        if duration_seconds is None:
+            return "não registrada"
+        return self._format_seconds(duration_seconds)
+
+    def _format_rest(self, rest_seconds: int | None) -> str:
+        if rest_seconds is None:
+            return "não registrado"
+
+        minutes, seconds = divmod(int(rest_seconds), 60)
+        return f"{minutes}:{seconds:02d} min"
+
+    def _format_seconds(self, seconds: float | int) -> str:
+        if float(seconds).is_integer():
+            return f"{int(seconds)}s"
+        return f"{seconds}s"

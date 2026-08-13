@@ -1,4 +1,8 @@
 import type {
+  AnalysisReport,
+  AnalysisReportGeneratePayload,
+  AnalysisReportListItem,
+  AnalysisReportUpdatePayload,
   AnalyticsOverview,
   ApiErrorPayload,
   BodyRegion,
@@ -83,6 +87,39 @@ export function getCurrentUser(accessToken: string) {
 
 export function getAnalyticsOverview(accessToken: string) {
   return apiFetch<AnalyticsOverview>("/analytics/overview", { accessToken });
+}
+
+export function listAnalysisReports(accessToken: string, limit = 20) {
+  return apiFetch<AnalysisReportListItem[]>(`/analytics/reports?limit=${limit}`, {
+    accessToken,
+  });
+}
+
+export function generateAnalysisReport(
+  accessToken: string,
+  payload: AnalysisReportGeneratePayload,
+) {
+  return apiFetch<AnalysisReport>("/analytics/reports", {
+    method: "POST",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getAnalysisReport(accessToken: string, reportId: string) {
+  return apiFetch<AnalysisReport>(`/analytics/reports/${reportId}`, { accessToken });
+}
+
+export function updateAnalysisReport(
+  accessToken: string,
+  reportId: string,
+  payload: AnalysisReportUpdatePayload,
+) {
+  return apiFetch<AnalysisReport>(`/analytics/reports/${reportId}`, {
+    method: "PATCH",
+    accessToken,
+    body: JSON.stringify(payload),
+  });
 }
 
 export function listSkills(accessToken: string) {

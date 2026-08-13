@@ -19,6 +19,7 @@ import {
   updateSessionExercise,
   updateTrainingSet,
 } from "@/lib/api";
+import { parseRestTimeToSeconds } from "@/lib/time";
 import type {
   BodyRegion,
   Exercise,
@@ -60,17 +61,6 @@ function numberOrNull(value: string) {
   return trimmedValue ? Number(trimmedValue) : null;
 }
 
-function buildRestSeconds(values: TrainingSetFormValues) {
-  const trimmedRestTime = values.rest_time.trim();
-
-  if (!trimmedRestTime) {
-    return null;
-  }
-
-  const [minutes, seconds] = trimmedRestTime.split(":").map(Number);
-  return minutes * 60 + seconds;
-}
-
 function decimalOrNull(value: string) {
   const trimmedValue = value.trim();
   return trimmedValue ? trimmedValue : null;
@@ -87,7 +77,7 @@ function buildTrainingSetPayload(values: TrainingSetFormValues) {
     rpe: decimalOrNull(values.rpe),
     result: values.result,
     technical_quality: values.technical_quality || null,
-    rest_seconds: buildRestSeconds(values),
+    rest_seconds: parseRestTimeToSeconds(values.rest_time),
     notes: emptyToNull(values.notes),
   };
 }

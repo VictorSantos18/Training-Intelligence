@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { formatRestTimeInput, normalizeRestTimeInput } from "@/lib/time";
 import type { TrainingSetFormValues } from "@/types";
 
 import styles from "./training-set-form.module.css";
@@ -72,37 +73,6 @@ function clampNumberString(value: string, max: number) {
   }
 
   return String(Math.min(max, Math.max(0, numericValue)));
-}
-
-function formatRestTimeInput(value: string) {
-  if (value.includes(":")) {
-    const [minutes = "", seconds = ""] = value.split(":");
-    return `${minutes.replace(/\D/g, "").slice(0, 3)}:${seconds.replace(/\D/g, "").slice(0, 2)}`;
-  }
-
-  const digits = value.replace(/\D/g, "").slice(0, 5);
-  if (digits.length <= 2) {
-    return digits;
-  }
-
-  return `${digits.slice(0, -2)}:${digits.slice(-2)}`;
-}
-
-function normalizeRestTime(value: string) {
-  const formattedValue = formatRestTimeInput(value);
-  if (!formattedValue) {
-    return "";
-  }
-
-  const [minutesValue, secondsValue = ""] = formattedValue.split(":");
-  const minutes = Number(minutesValue || "0");
-  const seconds = Number(secondsValue.padStart(2, "0"));
-
-  if (!Number.isFinite(minutes) || !Number.isFinite(seconds)) {
-    return "";
-  }
-
-  return `${Math.min(minutes, 600)}:${String(Math.min(seconds, 59)).padStart(2, "0")}`;
 }
 
 export function TrainingSetForm({
@@ -188,7 +158,7 @@ export function TrainingSetForm({
         type="text"
         {...register("rest_time", {
           onBlur: (event) => {
-            setValue("rest_time", normalizeRestTime(event.target.value), {
+            setValue("rest_time", normalizeRestTimeInput(event.target.value), {
               shouldValidate: true,
             });
           },

@@ -18,6 +18,7 @@ from app.modules.analytics.schemas import (
     SessionsBySkillItem,
     TopExerciseItem,
 )
+from app.modules.analytics.service import AnalyticsService
 
 USER_ID = "5f6a2fb7-2ebd-455d-a118-69d55d01c08d"
 SESSION_ID = "37d23d66-b1f2-4f41-bb03-4f90728451cd"
@@ -228,3 +229,60 @@ def test_update_analysis_report_uses_current_user_id() -> None:
     assert str(report_id) == REPORT_ID
     assert user_id == USER_ID
     assert payload.external_analysis == "Manter volume e observar ombro."
+
+
+def test_generated_prompt_formats_rest_and_missing_duration() -> None:
+    service = AnalyticsService()
+
+    prompt = service._build_prompt(
+        title="Front Lever - semana",
+        filters={
+            "period_start": "2026-08-03",
+            "period_end": "2026-08-10",
+            "skill_name": "Front Lever",
+        },
+        summary_snapshot={
+            "total_sessions": 1,
+            "total_sets": 1,
+            "total_repetitions": 2,
+            "total_duration_seconds": 0,
+            "average_rpe": 7,
+            "average_energy_before": 8,
+            "average_sleep_hours": 7,
+            "max_pain_intensity": None,
+        },
+        training_sessions=[
+            {
+                "skill_name": "Front Lever",
+                "started_at": "2026-08-10T20:35:00+00:00",
+                "sleep_hours": 7,
+                "energy_before": 8,
+                "notes_after": None,
+                "exercises": [
+                    {
+                        "exercise_name": "Front Lever Pull Up",
+                        "execution_order": 1,
+                        "notes": None,
+                        "sets": [
+                            {
+                                "set_number": 1,
+                                "repetitions": 2,
+                                "duration_seconds": None,
+                                "rpe": 7,
+                                "result": "SUCCESS",
+                                "rest_seconds": 180,
+                                "notes": None,
+                            }
+                        ],
+                    }
+                ],
+                "pain_records": [],
+            }
+        ],
+    )
+
+    assert "duração=não registrada" in prompt
+    assert "descanso=3:00 min" in prompt
+    assert "Tempo total em isometria/execução: não registrado" in prompt
+    assert 'crie a seção "Resumo para salvar no app"' in prompt
+    assert "Essa seção deve ser curta, direta e acionável" in prompt
