@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { ApiError, getCurrentUser } from "@/lib/api";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
@@ -22,11 +22,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [sessionState, setSessionState] = useState<AuthSessionState>("checking");
   const [session, setSession] = useState<AuthenticatedSession | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const sessionRef = useRef<AuthenticatedSession | null>(null);
+
+  const setAuthenticatedSession = useCallback((nextSession: AuthenticatedSession | null) => {
+    sessionRef.current = nextSession;
+    setSession(nextSession);
+  }, []);
 
   const applySupabaseSession = useCallback(async (accessToken: string) => {
     try {
       const currentUser = await getCurrentUser(accessToken);
-      setSession({
+      setAuthenticatedSession({
         user: currentUser,
         accessToken,
       });
@@ -35,17 +41,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
         await getSupabaseClient().auth.signOut();
-        setSession(null);
+        setAuthenticatedSession(null);
         setError(null);
         setSessionState("unauthenticated");
         return;
       }
 
-      setSession(null);
+      setAuthenticatedSession(null);
       setError(err instanceof Error ? err.message : "Falha ao validar usuário.");
       setSessionState("unauthenticated");
     }
-  }, []);
+  }, [setAuthenticatedSession]);
 
   useEffect(() => {
     let isMounted = true;
@@ -55,7 +61,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (!isMounted) {
           return;
         }
-        setSession(null);
+        setAuthenticatedSession(null);
         setError("Supabase não está configurado no frontend.");
         setSessionState("unauthenticated");
         return;
@@ -69,7 +75,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       if (!data.session) {
-        setSession(null);
+        setAuthenticatedSession(null);
         setError(null);
         setSessionState("unauthenticated");
         return;
@@ -83,7 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       isMounted = false;
     };
-  }, [applySupabaseSession]);
+  }, [applySupabaseSession, setAuthenticatedSession]);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -99,29 +105,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       if (!authSession) {
-        setSession(null);
+        setAuthenticatedSession(null);
         setError(null);
         setSessionState("unauthenticated");
         return;
       }
 
       if (event === "TOKEN_REFRESHED") {
-        setSession((currentSession) =>
-          currentSession
-            ? { ...currentSession, accessToken: authSession.access_token }
-            : currentSession,
-        );
+        setSession((currentSession) => {
+          if (!currentSession) {
+            return currentSession;
+          }
+
+          const nextSession = {
+            ...currentSession,
+            accessToken: authSession.access_token,
+          };
+          sessionRef.current = nextSession;
+          return nextSession;
+        });
         return;
       }
 
-      setSessionState("checking");
+      if (sessionRef.current?.accessToken === authSession.access_token) {
+        return;
+      }
+
+      if (!sessionRef.current) {
+        setSessionState("checking");
+      }
       void applySupabaseSession(authSession.access_token);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [applySupabaseSession]);
+  }, [applySupabaseSession, setAuthenticatedSession]);
 
   const value = useMemo(
     () => ({

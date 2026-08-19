@@ -41,8 +41,8 @@ cd backend
 python -m venv .venv
 .venv\Scripts\activate
 python -m pip install -e ".[dev]"
-alembic upgrade head
-python -m uvicorn app.main:app --reload --port 8000
+alembic upgrade headpython -m uvicorn app.main:app --reload --port 8000
+
 ```
 
 Se o Windows bloquear o executável do Uvicorn, use o formato com módulo Python:
