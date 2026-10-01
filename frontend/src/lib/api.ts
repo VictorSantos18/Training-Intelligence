@@ -50,6 +50,54 @@ type ApiFetchOptions = RequestInit & {
   accessToken?: string;
 };
 
+type ApiCacheEntry<T> = {
+  expiresAt: number;
+  promise: Promise<T>;
+};
+
+const USER_RESOURCE_CACHE_TTL_MS = 5 * 60 * 1000;
+const REFERENCE_CACHE_TTL_MS = 30 * 60 * 1000;
+const apiCache = new Map<string, ApiCacheEntry<unknown>>();
+
+function getCacheKey(accessToken: string, resource: string, variant = "default") {
+  return `${accessToken}:${resource}:${variant}`;
+}
+
+function getCachedApiValue<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  ttlMs = USER_RESOURCE_CACHE_TTL_MS,
+) {
+  const now = Date.now();
+  const cached = apiCache.get(key) as ApiCacheEntry<T> | undefined;
+
+  if (cached && cached.expiresAt > now) {
+    return cached.promise;
+  }
+
+  const promise = fetcher().catch((error) => {
+    apiCache.delete(key);
+    throw error;
+  });
+
+  apiCache.set(key, {
+    expiresAt: now + ttlMs,
+    promise,
+  });
+
+  return promise;
+}
+
+function invalidateApiCache(accessToken: string, resources: string[]) {
+  const resourcePrefixes = resources.map((resource) => `${accessToken}:${resource}:`);
+
+  for (const key of apiCache.keys()) {
+    if (resourcePrefixes.some((prefix) => key.startsWith(prefix))) {
+      apiCache.delete(key);
+    }
+  }
+}
+
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   const { accessToken, headers, ...requestOptions } = options;
   const response = await fetch(`${getApiUrl()}${path}`, {
@@ -123,7 +171,9 @@ export function updateAnalysisReport(
 }
 
 export function listSkills(accessToken: string) {
-  return apiFetch<Skill[]>("/skills", { accessToken });
+  return getCachedApiValue(getCacheKey(accessToken, "skills"), () =>
+    apiFetch<Skill[]>("/skills", { accessToken }),
+  );
 }
 
 export function createSkill(accessToken: string, payload: SkillCreatePayload) {
@@ -131,6 +181,9 @@ export function createSkill(accessToken: string, payload: SkillCreatePayload) {
     method: "POST",
     accessToken,
     body: JSON.stringify(payload),
+  }).then((skill) => {
+    invalidateApiCache(accessToken, ["skills", "exercises"]);
+    return skill;
   });
 }
 
@@ -139,6 +192,9 @@ export function updateSkill(accessToken: string, skillId: string, payload: Skill
     method: "PATCH",
     accessToken,
     body: JSON.stringify(payload),
+  }).then((skill) => {
+    invalidateApiCache(accessToken, ["skills", "exercises"]);
+    return skill;
   });
 }
 
@@ -146,6 +202,9 @@ export function deleteSkill(accessToken: string, skillId: string) {
   return apiFetch<void>(`/skills/${skillId}`, {
     method: "DELETE",
     accessToken,
+  }).then((result) => {
+    invalidateApiCache(accessToken, ["skills", "exercises"]);
+    return result;
   });
 }
 
@@ -162,7 +221,10 @@ export function listExercises(
   }
 
   const query = params.toString();
-  return apiFetch<Exercise[]>(`/exercises${query ? `?${query}` : ""}`, { accessToken });
+  const path = `/exercises${query ? `?${query}` : ""}`;
+  return getCachedApiValue(getCacheKey(accessToken, "exercises", query), () =>
+    apiFetch<Exercise[]>(path, { accessToken }),
+  );
 }
 
 export function createExercise(accessToken: string, payload: ExerciseCreatePayload) {
@@ -170,6 +232,9 @@ export function createExercise(accessToken: string, payload: ExerciseCreatePaylo
     method: "POST",
     accessToken,
     body: JSON.stringify(payload),
+  }).then((exercise) => {
+    invalidateApiCache(accessToken, ["exercises"]);
+    return exercise;
   });
 }
 
@@ -182,6 +247,9 @@ export function updateExercise(
     method: "PATCH",
     accessToken,
     body: JSON.stringify(payload),
+  }).then((exercise) => {
+    invalidateApiCache(accessToken, ["exercises"]);
+    return exercise;
   });
 }
 
@@ -189,6 +257,9 @@ export function deactivateExercise(accessToken: string, exerciseId: string) {
   return apiFetch<Exercise>(`/exercises/${exerciseId}`, {
     method: "DELETE",
     accessToken,
+  }).then((exercise) => {
+    invalidateApiCache(accessToken, ["exercises"]);
+    return exercise;
   });
 }
 
@@ -317,7 +388,11 @@ export function deleteTrainingSet(accessToken: string, setId: string) {
 }
 
 export function listBodyRegions(accessToken: string) {
-  return apiFetch<BodyRegion[]>("/body-regions", { accessToken });
+  return getCachedApiValue(
+    getCacheKey(accessToken, "body-regions"),
+    () => apiFetch<BodyRegion[]>("/body-regions", { accessToken }),
+    REFERENCE_CACHE_TTL_MS,
+  );
 }
 
 export function listPainRecords(
